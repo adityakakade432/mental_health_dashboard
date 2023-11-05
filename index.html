@@ -43,8 +43,8 @@
       var statesMesh = topojson.mesh(us, us.objects.states);
       var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
       var path = d3.geoPath().projection(projection);
-      //Temperature Data Processing
 
+      //Temperature Data Processing
       var temp_data_map = {};
       var temp_individual = [];
       var temp_data_raw = await d3.csv("./data/average-temperatures-by-state.csv",
@@ -53,10 +53,28 @@
           temp_individual.push(d.averageTemperatureF);
         });
 
+      //Depression Data Processing
+      var depression_data_map = {};
+      var depression_individual = [];
+      var depression_data_raw = await d3.csv("./data/depression-rates-by-state.csv",
+        function (d) {
+          depression_data_map[d.numberCode] = d.CrudeDepressionRate;
+          depression_individual.push(d.CrudeDepressionRate);
+        });
+
+      //Sunlight Data Processing
+      var sunlight_data_map = {};
+      var sunlight_individual = [];
+      var sunlight_data_raw = await d3.csv("./data/sunniest-states.csv",
+        function (d) {
+          sunlight_data_map[d.numberCode] = d.averageAnnualSunlight;
+          sunlight_individual.push(d.averageAnnualSunlight);
+        });
+
       var colorQuintiles = ["#6efad7", "#00d5e8", "#00abf7", "#0079ee", "#5536bb"];
       const temp_color_scale = d3.scaleQuantile().domain(temp_individual).range(colorQuintiles);
-
-      var colorScale;
+      const depression_color_scale = d3.scaleQuantile().domain(depression_individual).range(colorQuintiles);
+      const sunlight_color_scale = d3.scaleQuantile().domain(sunlight_individual).range(colorQuintiles);
 
       let statePaths = map.selectAll("path.state")
         .data(states.features)
@@ -65,11 +83,14 @@
         .attr("note", d => d.id)
         .attr("d", path)
         .attr("fill", function (d) {
-          if (mode == 0) {
+          if (mode == 1) {
             return temp_color_scale(temp_data_map[d.id]);
           }
-          else {
-            return temp_color_scale(temp_individual[d.id]);
+          else if (mode == 0) {
+            return depression_color_scale(depression_data_map[d.id]);
+          }
+          else if (mode == 2) {
+            return sunlight_color_scale(sunlight_data_map[d.id]);
           }
         })
 
@@ -78,13 +99,18 @@
         .attr("class", "outline")
         .attr("d", path);
 
-      console.log(temp_color_scale.quantiles());
-
     }
 
     d3.select("#temperatures").on("click", function (event) {
-      console.log("clocked")
       requestChoroplethData(1)
+    });
+
+    d3.select("#depression").on("click", function (event) {
+      requestChoroplethData(0)
+    });
+
+    d3.select("#sunlight").on("click", function (event) {
+      requestChoroplethData(2)
     });
 
     requestChoroplethData(0);

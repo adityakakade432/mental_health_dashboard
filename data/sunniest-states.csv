@@ -1,51 +1,49 @@
-"state","averageAnnualSunlight"
-"Arizona",5755
-"New Mexico",5642
-"Nevada",5296
-"Texas",5137
-"California",5050
-"Colorado",4960
-"Oklahoma",4912
-"Kansas",4890
-"Utah",4887
-"Florida",4859
-"Arkansas",4725
-"Louisiana",4725
-"Mississippi",4693
-"Nebraska",4685
-"Georgia",4661
-"Alabama",4660
-"South Carolina",4624
-"Missouri",4545
-"Tennessee",4486
-"Wyoming",4471
-"North Carolina",4466
-"Kentucky",4383
-"Illinois",4380
-"Virginia",4354
-"South Dakota",4332
-"Iowa",4331
-"Indiana",4318
-"Maryland",4267
-"Idaho",4251
-"Delaware",4232
-"West Virginia",4146
-"Ohio",4139
-"New Jersey",4056
-"Wisconsin",4023
-"Michigan",4018
-"Rhode Island",3989
-"Connecticut",3988
-"Minnesota",3968
-"Massachusetts",3944
-"Pennsylvania",3939
-"North Dakota",3925
-"New York",3904
-"New Hampshire",3891
-"Montana",3847
-"Oregon",3830
-"Vermont",3826
-"Maine",3815
-"Washington",3467
-"Alaska",
-"Hawaii",
+state,averageAnnualSunlight,,numberCode
+Alabama,4660,,1
+Arizona,5755,,4
+Arkansas,4725,,5
+California,5050,,6
+Colorado,4960,,8
+Connecticut,3988,,9
+Delaware,4232,,10
+Florida,4859,,12
+Georgia,4661,,13
+Idaho,4251,,16
+Illinois,4380,,17
+Indiana,4318,,18
+Iowa,4331,,19
+Kansas,4890,,20
+Kentucky,4383,,21
+Louisiana,4725,,22
+Maine,3815,,23
+Maryland,4267,,24
+Massachusetts,3944,,25
+Michigan,4018,,26
+Minnesota,3968,,27
+Mississippi,4693,,28
+Missouri,4545,,29
+Montana,3847,,30
+Nebraska,4685,,31
+Nevada,5296,,32
+New Hampshire,3891,,33
+New Jersey,4056,,34
+New Mexico,5642,,35
+New York,3904,,36
+North Carolina,4466,,37
+North Dakota,3925,,38
+Ohio,4139,,39
+Oklahoma,4912,,40
+Oregon,3830,,41
+Pennsylvania,3939,,42
+Rhode Island,3989,,44
+South Carolina,4624,,45
+South Dakota,4332,,46
+Tennessee,4486,,47
+Texas,5137,,48
+Utah,4887,,49
+Vermont,3826,,50
+Virginia,4354,,51
+Washington,3467,,53
+West Virginia,4146,,54
+Wisconsin,4023,,55
+Wyoming,4471,,56
