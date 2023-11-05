@@ -2,9 +2,93 @@
 <h3>Info 300 P2: Aditya, Gabby, Bhadra, Richie</h3>
 
 <head>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
 
+  <style>
+    #choropleth {
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
+    }
+
+    .outline {
+      fill: none;
+      stroke: rgb(255, 255, 255);
+      stroke-width: 1px;
+    }
+  </style>
 </head>
-<script>
-</script>
+
+<body>
+  <svg id="choropleth" height="600" width="900" style="background: rgb(255, 255, 255); margin-top:50px">
+  </svg>
+  <button id="depression">Depression Rates (%)</button>
+  <button id="temperatures">Average Temperatures (F)</button>
+  <button id="sunlight">Average Sunlight (Hrs)</button>
+  <script>
+    const svg = d3.select("#choropleth");
+    const width = svg.attr("width");
+    const height = svg.attr("height");
+    const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+    const mapWidth = width - margin.left - margin.right;
+    const mapHeight = height - margin.top - margin.bottom;
+    const map = svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    var mode = 0;
+
+    const requestChoroplethData = async function (mode) {
+      const us = await d3.json("./data/us.json");
+      var states = topojson.feature(us, us.objects.states);
+      var statesMesh = topojson.mesh(us, us.objects.states);
+      var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
+      var path = d3.geoPath().projection(projection);
+      //Temperature Data Processing
+
+      var temp_data_map = {};
+      var temp_individual = [];
+      var temp_data_raw = await d3.csv("./data/average-temperatures-by-state.csv",
+        function (d) {
+          temp_data_map[d.numberCode] = d.averageTemperatureF;
+          temp_individual.push(d.averageTemperatureF);
+        });
+
+      var colorQuintiles = ["#6efad7", "#00d5e8", "#00abf7", "#0079ee", "#5536bb"];
+      const temp_color_scale = d3.scaleQuantile().domain(temp_individual).range(colorQuintiles);
+
+      var colorScale;
+
+      let statePaths = map.selectAll("path.state")
+        .data(states.features)
+        .join("path")
+        .attr("class", "state")
+        .attr("note", d => d.id)
+        .attr("d", path)
+        .attr("fill", function (d) {
+          if (mode == 0) {
+            return temp_color_scale(temp_data_map[d.id]);
+          }
+          else {
+            return temp_color_scale(temp_individual[d.id]);
+          }
+        })
+
+      map.append("path")
+        .datum(statesMesh)
+        .attr("class", "outline")
+        .attr("d", path);
+
+      console.log(temp_color_scale.quantiles());
+
+    }
+
+    d3.select("#temperatures").on("click", function (event) {
+      console.log("clocked")
+      requestChoroplethData(1)
+    });
+
+    requestChoroplethData(0);
+  </script>
+</body>
 
 </html>
