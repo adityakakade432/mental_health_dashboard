@@ -33,8 +33,8 @@
 
     .data-sel {
       margin-top: auto;
-      margin-bottom:auto;
-      margin-left:2px;
+      margin-bottom: auto;
+      margin-left: 2px;
       margin-right: 2px;
       background-color: rgb(180, 223, 230);
       border: none;
@@ -209,6 +209,142 @@
             .attr("class", "outline")
             .attr("d", path_change);
 
+
+          let tooltipWidth = 100;
+          let tooltipHeight = 25;
+
+          const depressionMesh = map_dep.append("path")
+            .attr("class", "depression-mesh")
+            .style("stroke", "none")
+            .style("fill", "none");
+
+          let tooltip1 = map_dep.append("g")
+            .attr("class", "tooltip1")
+            .attr("visibility", "hidden");
+
+          tooltip1.append("rect")
+            .attr("fill", "black")
+            .attr("opacity", 0.2)
+            .attr("x", -tooltipWidth / 2.0)
+            .attr("y", 0)
+            .attr("width", tooltipWidth)
+            .attr("height", tooltipHeight);
+
+          tooltip1.append("text")
+            .attr("fill", "white")
+            .attr("text-anchor", "middle")
+            .attr("alignment-baseline", "hanging")
+            .attr("x", 0)
+            .attr("y", 8)
+            .attr("id", "depression-text");
+
+          const changeMesh = map_change.append("path")
+            .attr("class", "change-mesh")
+            .style("stroke", "none")
+            .style("fill", "none");
+
+          let tooltip2 = map_change.append("g")
+            .attr("class", "tooltip2")
+            .attr("visibility", "hidden");
+
+          tooltip2.append("rect")
+            .attr("fill", "black")
+            .attr("opacity", 0.2)
+            .attr("x", -tooltipWidth / 2.0)
+            .attr("y", 0)
+            .attr("width", tooltipWidth)
+            .attr("height", tooltipHeight);
+
+          tooltip2.append("text")
+            .attr("fill", "white")
+            .attr("text-anchor", "middle")
+            .attr("alignment-baseline", "hanging")
+            .attr("x", 0)
+            .attr("y", 8)
+            .attr("id", "change-text");
+
+
+          map_dep.selectAll("path.state")
+            .on("mouseover", function (event, d) {
+              const depression_val = depression_data_map[d.id]
+              console.log(depression_val)
+
+              tooltip1.style("visibility", "visible")
+
+              const [x, y] = d3.pointer(event);
+
+              const xPos = x;
+              const yPos = y - 25;
+
+              tooltip1.attr("transform", `translate(${xPos},${yPos})`);
+
+              tooltip1.select("rect")
+                .attr("width", tooltipWidth)
+                .attr("height", tooltipHeight);
+
+              tooltip1.select("#depression-text")
+                .text(`${depression_val}`);
+
+              depressionMesh.attr("d", path_dep(d))
+                .style("stroke", "darkblue")
+                .style("stroke-width", 3);
+
+            })
+            .on("mouseout", function () {
+              tooltip1.style("visibility", "hidden");
+              depressionMesh.style("stroke", "none").style("stroke-width", 0);
+
+            });
+
+
+          map_change.selectAll("path.state")
+            .on("mouseover", function (event, d) {
+              const temp_val = temp_data_map[d.id]
+              const sunlight_val = d3.format(",")(sunlight_data_map[d.id])
+              const income_val = d3.format(",.2f")(income_data_map[d.id])
+
+              tooltip2.style("visibility", "visible")
+
+
+              const [x, y] = d3.pointer(event);
+
+              const xPos = x;
+              const yPos = y - 25;
+
+
+          
+              tooltip2.attr("transform", `translate(${xPos},${yPos})`);
+
+              tooltip2.select("rect")
+                .attr("width", tooltipWidth)
+                .attr("height", tooltipHeight);
+
+              if (mode == 1) {
+                tooltip2.select("#change-text")
+                  .text(`${temp_val} \u00B0 F`);
+              }
+              else if (mode == 2) {
+                tooltip2.select("#change-text")
+                  .text(`${sunlight_val} Hrs`);
+              }
+              else if (mode == 3) {
+                tooltip2.select("#change-text")
+                  .text(`$${income_val}`);
+              }
+
+
+              changeMesh.attr("d", path_change(d))
+                .style("stroke", "darkblue")
+                .style("stroke-width", 3);
+
+            })
+            .on("mouseout", function () {
+              tooltip2.style("visibility", "hidden");
+              changeMesh.style("stroke", "none").style("stroke-width", 0);
+
+            });
+
+
         }
 
         d3.select("#temperatures").on("click", function (event) {
@@ -241,6 +377,13 @@
         d3.select("#temperatures").classed('active-sel', true);
 
         requestChoroplethData(1);
+
+
+
+
+
+
+
       </script>
 </div>
 
