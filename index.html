@@ -9,12 +9,14 @@
       outline: 5px solid rgb(180, 223, 230);
       grid-column: 1;
       margin: auto;
+      border-radius: 20px;
     }
 
     #choropleth_change {
       outline: 5px solid rgb(180, 223, 230);
       grid-column: 2;
       margin: auto;
+      border-radius: 20px;
     }
 
     .outline {
@@ -30,7 +32,10 @@
     }
 
     .data-sel {
-      margin: auto;
+      margin-top: auto;
+      margin-bottom:auto;
+      margin-left:2px;
+      margin-right: 2px;
       background-color: rgb(180, 223, 230);
       border: none;
       color: white;
@@ -39,12 +44,17 @@
       text-decoration: none;
       display: inline-block;
       font-size: 16px;
-      width: 300;
-      height: 50;
+      height: 80px;
+      flex: 1;
+      border-radius: 20px;
     }
 
     .data-sel:hover {
       background-color: rgb(43, 124, 217);
+    }
+
+    .active-sel {
+      background-color: rgb(130, 179, 236);
     }
 
     .left-title {
@@ -60,8 +70,12 @@
     }
 
     .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      max-width: 654px;
       grid-column: 2;
-      margin: auto;
+      margin: 0 auto;
+      justify-content: space-between;
     }
   </style>
 </head>
@@ -69,14 +83,16 @@
 <div class="wrapper">
   <h1 id="left" class="left-title">US Depression Rates</h2>
     <h1 id="right" class="right-title">US Average Temperatures</h2>
-      <svg id="choropleth_dep" height="500" width="700" style="background: rgb(255, 255, 255); margin-top:50px">
-      </svg>
-      <svg id="choropleth_change" height="500" width="700" style="background: rgb(255, 255, 255); margin-top:50px">
-      </svg>
+      <svg id="choropleth_dep" height="500" width="650" style="background: rgb(255, 255, 255); margin-top:50px"></svg>
+      <svg id="choropleth_change" height="500" width="650"
+        style="background: rgb(255, 255, 255); margin-top:50px"></svg>
+
       <div class="buttons">
         <button id="temperatures" class="data-sel">Average Temperatures (F)</button>
         <button id="sunlight" class="data-sel">Average Sunlight (Hrs)</button>
+        <button id="income" class="data-sel">Median Household Income ($)</button>
       </div>
+
       <script>
         const svg_dep = d3.select("#choropleth_dep");
         const svg_change = d3.select("#choropleth_change");
@@ -116,6 +132,8 @@
               temp_data_map[d.numberCode] = d.averageTemperatureF;
               temp_individual.push(d.averageTemperatureF);
             });
+          console.log(temp_data_map)
+
 
           //Depression Data Processing
           var depression_data_map = {};
@@ -125,6 +143,7 @@
               depression_data_map[d.numberCode] = d.CrudeDepressionRate;
               depression_individual.push(d.CrudeDepressionRate);
             });
+          console.log(depression_data_map)
 
           //Sunlight Data Processing
           var sunlight_data_map = {};
@@ -134,11 +153,23 @@
               sunlight_data_map[d.numberCode] = d.averageAnnualSunlight;
               sunlight_individual.push(d.averageAnnualSunlight);
             });
+          console.log(sunlight_data_map)
+
+          //Sunlight Data Processing
+          var income_data_map = {};
+          var income_individual = [];
+          var income_data_raw = await d3.csv("./data/median-household-income-by-state.csv",
+            function (d) {
+              income_data_map[d.numberCode] = d.medianHouseholdIncome2021;
+              income_individual.push(d.medianHouseholdIncome2021);
+            });
+          console.log(income_data_map)
 
           var colorQuintiles = ["#6efad7", "#00d5e8", "#00abf7", "#0079ee", "#5536bb"];
           const temp_color_scale = d3.scaleQuantile().domain(temp_individual).range(colorQuintiles);
           const depression_color_scale = d3.scaleQuantile().domain(depression_individual).range(colorQuintiles);
           const sunlight_color_scale = d3.scaleQuantile().domain(sunlight_individual).range(colorQuintiles);
+          const income_color_scale = d3.scaleQuantile().domain(income_individual).range(colorQuintiles);
 
           let statePaths_dep = map_dep.selectAll("path.state")
             .data(states.features)
@@ -163,6 +194,9 @@
               else if (mode == 2) {
                 return sunlight_color_scale(sunlight_data_map[d.id]);
               }
+              else if (mode == 3) {
+                return income_color_scale(income_data_map[d.id]);
+              }
             })
 
           map_dep.append("path")
@@ -181,13 +215,30 @@
           requestChoroplethData(1)
           d3.select('#right')
             .text('US Average Temperatures')
+          d3.selectAll('.data-sel').classed('active-sel', false);
+          d3.select(this).classed('active-sel', true);
+
         });
 
         d3.select("#sunlight").on("click", function (event) {
           requestChoroplethData(2)
           d3.select('#right')
             .text('US Average Sunlight')
+          d3.selectAll('.data-sel').classed('active-sel', false);
+          d3.select(this).classed('active-sel', true);
+
         });
+
+        d3.select("#income").on("click", function (event) {
+          requestChoroplethData(3)
+          d3.select('#right')
+            .text('US Median Income')
+          d3.selectAll('.data-sel').classed('active-sel', false);
+          d3.select(this).classed('active-sel', true);
+
+        });
+
+        d3.select("#temperatures").classed('active-sel', true);
 
         requestChoroplethData(1);
       </script>
