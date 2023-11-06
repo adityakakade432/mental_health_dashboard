@@ -225,10 +225,10 @@
           tooltip1.append("rect")
             .attr("fill", "black")
             .attr("opacity", 0.2)
-            .attr("x", -tooltipWidth / 2.0)
             .attr("y", 0)
             .attr("width", tooltipWidth)
-            .attr("height", tooltipHeight);
+            .attr("height", tooltipHeight)
+            .attr("rx", 10);
 
           tooltip1.append("text")
             .attr("fill", "white")
@@ -250,10 +250,10 @@
           tooltip2.append("rect")
             .attr("fill", "black")
             .attr("opacity", 0.2)
-            .attr("x", -tooltipWidth / 2.0)
             .attr("y", 0)
             .attr("width", tooltipWidth)
-            .attr("height", tooltipHeight);
+            .attr("height", tooltipHeight)
+            .attr("rx", 10);
 
           tooltip2.append("text")
             .attr("fill", "white")
@@ -278,12 +278,19 @@
 
               tooltip1.attr("transform", `translate(${xPos},${yPos})`);
 
-              tooltip1.select("rect")
-                .attr("width", tooltipWidth)
-                .attr("height", tooltipHeight);
-
               tooltip1.select("#depression-text")
                 .text(`${depression_val}`);
+
+              const textElement = tooltip1.select("#depression-text");
+              const textBoundingBox = textElement.node().getBBox();
+              const tooltipWidth = textBoundingBox.width + 20; 
+
+              tooltip1.select("rect")
+                .attr("width", tooltipWidth) 
+                .attr("height", tooltipHeight);
+
+              textElement
+                .attr("x", tooltipWidth / 2) 
 
               depressionMesh.attr("d", path_dep(d))
                 .style("stroke", "darkblue")
@@ -312,12 +319,8 @@
               const yPos = y - 25;
 
 
-          
-              tooltip2.attr("transform", `translate(${xPos},${yPos})`);
 
-              tooltip2.select("rect")
-                .attr("width", tooltipWidth)
-                .attr("height", tooltipHeight);
+              tooltip2.attr("transform", `translate(${xPos},${yPos})`);      
 
               if (mode == 1) {
                 tooltip2.select("#change-text")
@@ -331,6 +334,17 @@
                 tooltip2.select("#change-text")
                   .text(`$${income_val}`);
               }
+
+              const textElement = tooltip2.select("#change-text");
+              const textBoundingBox = textElement.node().getBBox();
+              const tooltipWidth = textBoundingBox.width + 20; // Add some padding
+
+              tooltip2.select("rect")
+                .attr("width", tooltipWidth) // Set the calculated width
+                .attr("height", tooltipHeight);
+
+              textElement
+                .attr("x", tooltipWidth / 2) // Center the text in the tooltip
 
 
               changeMesh.attr("d", path_change(d))
