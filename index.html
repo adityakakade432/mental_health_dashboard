@@ -76,328 +76,516 @@
       margin: 0 auto;
       justify-content: space-between;
     }
+
+    .grid line {
+      stroke: #e6e6e6;
+    }
   </style>
 </head>
 
-<div class="wrapper">
-  <h1 id="left" class="left-title">US Depression Rates</h2>
-    <h1 id="right" class="right-title">US Average Temperatures</h2>
-      <svg id="choropleth_dep" height="500" width="650" style="background: rgb(255, 255, 255); margin-top:20px"></svg>
-      <svg id="choropleth_change" height="500" width="650"
-        style="background: rgb(255, 255, 255); margin-top:20px"></svg>
+<body>
 
-      <div class="buttons">
-        <button id="temperatures" class="data-sel">Average Temperatures (F)</button>
-        <button id="sunlight" class="data-sel">Average Sunlight (Hrs)</button>
-        <button id="income" class="data-sel">Median Household Income ($)</button>
-      </div>
+  <div class="wrapper">
+    <h1 id="left" class="left-title">US Depression Rates</h2>
+      <h1 id="right" class="right-title">US Average Temperatures</h2>
+        <svg id="choropleth_dep" height="500" width="650" style="background: rgb(255, 255, 255); margin-top:20px"></svg>
+        <svg id="choropleth_change" height="500" width="650"
+          style="background: rgb(255, 255, 255); margin-top:20px"></svg>
 
-      <script>
-        const svg_dep = d3.select("#choropleth_dep");
-        const svg_change = d3.select("#choropleth_change");
+        <div class="buttons">
+          <button id="temperatures" class="data-sel">Average Temperatures (F)</button>
+          <button id="sunlight" class="data-sel">Average Sunlight (Hrs)</button>
+          <button id="income" class="data-sel">Median Household Income ($)</button>
+        </div>
 
-        const width_dep = svg_dep.attr("width");
-        const height_dep = svg_dep.attr("height");
-        const width_change = svg_change.attr("width");
-        const height_change = svg_change.attr("height");
+        <script>
+          const svg_dep = d3.select("#choropleth_dep");
+          const svg_change = d3.select("#choropleth_change");
 
-        const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+          const width_dep = svg_dep.attr("width");
+          const height_dep = svg_dep.attr("height");
+          const width_change = svg_change.attr("width");
+          const height_change = svg_change.attr("height");
 
-        const mapWidth_dep = width_dep - margin.left - margin.right;
-        const mapHeight_dep = height_dep - margin.top - margin.bottom;
-        const mapWidth_change = width_change - margin.left - margin.right;
-        const mapHeight_change = height_change - margin.top - margin.bottom;
+          const margin = { top: 20, right: 20, bottom: 20, left: 20 };
 
-        const map_dep = svg_dep.append("g")
-          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        const map_change = svg_change.append("g")
-          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+          const mapWidth_dep = width_dep - margin.left - margin.right;
+          const mapHeight_dep = height_dep - margin.top - margin.bottom;
+          const mapWidth_change = width_change - margin.left - margin.right;
+          const mapHeight_change = height_change - margin.top - margin.bottom;
 
-        const requestChoroplethData = async function (mode) {
-          const us = await d3.json("./data/us.json");
-          var states = topojson.feature(us, us.objects.states);
-          var statesMesh = topojson.mesh(us, us.objects.states);
-          var projection_dep = d3.geoAlbersUsa().fitSize([mapWidth_dep, mapHeight_dep], states);
-          var projection_change = d3.geoAlbersUsa().fitSize([mapWidth_change, mapHeight_change], states);
+          const map_dep = svg_dep.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+          const map_change = svg_change.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-          var path_dep = d3.geoPath().projection(projection_dep);
-          var path_change = d3.geoPath().projection(projection_dep);
+          const requestChoroplethData = async function (mode) {
+            const us = await d3.json("./data/us.json");
+            var states = topojson.feature(us, us.objects.states);
+            var statesMesh = topojson.mesh(us, us.objects.states);
+            var projection_dep = d3.geoAlbersUsa().fitSize([mapWidth_dep, mapHeight_dep], states);
+            var projection_change = d3.geoAlbersUsa().fitSize([mapWidth_change, mapHeight_change], states);
 
-          //Temperature Data Processing
-          var temp_data_map = {};
-          var temp_individual = [];
-          var temp_data_raw = await d3.csv("./data/average-temperatures-by-state.csv",
-            function (d) {
-              temp_data_map[d.numberCode] = d.averageTemperatureF;
-              temp_individual.push(d.averageTemperatureF);
-            });
-          console.log(temp_data_map)
+            var path_dep = d3.geoPath().projection(projection_dep);
+            var path_change = d3.geoPath().projection(projection_dep);
 
-
-          //Depression Data Processing
-          var depression_data_map = {};
-          var depression_individual = [];
-          var depression_data_raw = await d3.csv("./data/depression-rates-by-state.csv",
-            function (d) {
-              depression_data_map[d.numberCode] = d.CrudeDepressionRate;
-              depression_individual.push(d.CrudeDepressionRate);
-            });
-          console.log(depression_data_map)
-
-          //Sunlight Data Processing
-          var sunlight_data_map = {};
-          var sunlight_individual = [];
-          var sunlight_data_raw = await d3.csv("./data/sunniest-states.csv",
-            function (d) {
-              sunlight_data_map[d.numberCode] = d.averageAnnualSunlight;
-              sunlight_individual.push(d.averageAnnualSunlight);
-            });
-          console.log(sunlight_data_map)
-
-          //Sunlight Data Processing
-          var income_data_map = {};
-          var income_individual = [];
-          var income_data_raw = await d3.csv("./data/median-household-income-by-state.csv",
-            function (d) {
-              income_data_map[d.numberCode] = d.medianHouseholdIncome2021;
-              income_individual.push(d.medianHouseholdIncome2021);
-            });
-          console.log(income_data_map)
-
-          var colorQuintiles = ["#6efad7", "#00d5e8", "#00abf7", "#0079ee", "#5536bb"];
-          const temp_color_scale = d3.scaleQuantile().domain(temp_individual).range(colorQuintiles);
-          const depression_color_scale = d3.scaleQuantile().domain(depression_individual).range(colorQuintiles);
-          const sunlight_color_scale = d3.scaleQuantile().domain(sunlight_individual).range(colorQuintiles);
-          const income_color_scale = d3.scaleQuantile().domain(income_individual).range(colorQuintiles);
-
-          let statePaths_dep = map_dep.selectAll("path.state")
-            .data(states.features)
-            .join("path")
-            .attr("class", "state")
-            .attr("note", d => d.id)
-            .attr("d", path_dep)
-            .attr("fill", function (d) {
-              return depression_color_scale(depression_data_map[d.id]);
-            })
-
-          let statePaths_change = map_change.selectAll("path.state")
-            .data(states.features)
-            .join("path")
-            .attr("class", "state")
-            .attr("note", d => d.id)
-            .attr("d", path_change)
-            .attr("fill", function (d) {
-              if (mode == 1) {
-                return temp_color_scale(temp_data_map[d.id]);
-              }
-              else if (mode == 2) {
-                return sunlight_color_scale(sunlight_data_map[d.id]);
-              }
-              else if (mode == 3) {
-                return income_color_scale(income_data_map[d.id]);
-              }
-            })
-
-          map_dep.append("path")
-            .datum(statesMesh)
-            .attr("class", "outline")
-            .attr("d", path_dep);
-
-          map_change.append("path")
-            .datum(statesMesh)
-            .attr("class", "outline")
-            .attr("d", path_change);
+            //Temperature Data Processing
+            var temp_data_map = {};
+            var temp_individual = [];
+            var temp_data_raw = await d3.csv("./data/average-temperatures-by-state.csv",
+              function (d) {
+                temp_data_map[d.numberCode] = d.averageTemperatureF;
+                temp_individual.push(d.averageTemperatureF);
+              });
+            console.log(temp_data_map)
 
 
-          let tooltipWidth = 100;
-          let tooltipHeight = 25;
+            //Depression Data Processing
+            var depression_data_map = {};
+            var depression_individual = [];
+            var depression_data_raw = await d3.csv("./data/depression-rates-by-state.csv",
+              function (d) {
+                depression_data_map[d.numberCode] = d.CrudeDepressionRate;
+                depression_individual.push(d.CrudeDepressionRate);
+              });
+            console.log(depression_data_map)
 
-          const depressionMesh = map_dep.append("path")
-            .attr("class", "depression-mesh")
-            .style("stroke", "none")
-            .style("fill", "none");
+            //Sunlight Data Processing
+            var sunlight_data_map = {};
+            var sunlight_individual = [];
+            var sunlight_data_raw = await d3.csv("./data/sunniest-states.csv",
+              function (d) {
+                sunlight_data_map[d.numberCode] = d.averageAnnualSunlight;
+                sunlight_individual.push(d.averageAnnualSunlight);
+              });
+            console.log(sunlight_data_map)
 
-          let tooltip1 = map_dep.append("g")
-            .attr("class", "tooltip1")
-            .attr("visibility", "hidden");
+            //Income Data Processing
+            var income_data_map = {};
+            var income_individual = [];
+            var income_data_raw = await d3.csv("./data/median-household-income-by-state.csv",
+              function (d) {
+                income_data_map[d.numberCode] = d.medianHouseholdIncome2021;
+                income_individual.push(d.medianHouseholdIncome2021);
+              });
+            console.log(income_data_map)
 
-          tooltip1.append("rect")
-            .attr("fill", "black")
-            .attr("opacity", 0.2)
-            .attr("y", 0)
-            .attr("width", tooltipWidth)
-            .attr("height", tooltipHeight)
-            .attr("rx", 10);
+            var colorQuintiles = ["#6efad7", "#00d5e8", "#00abf7", "#0079ee", "#5536bb"];//['#bfe7ff', '#82c7f2', '#3ab4e1', '#6bc9aa', '#00c0a0'];
+            const temp_color_scale = d3.scaleQuantile().domain(temp_individual).range(colorQuintiles);
+            const depression_color_scale = d3.scaleQuantile().domain(depression_individual).range(colorQuintiles);
+            const sunlight_color_scale = d3.scaleQuantile().domain(sunlight_individual).range(colorQuintiles);
+            const income_color_scale = d3.scaleQuantile().domain(income_individual).range(colorQuintiles);
 
-          tooltip1.append("text")
-            .attr("fill", "white")
-            .attr("text-anchor", "middle")
-            .attr("alignment-baseline", "hanging")
-            .attr("x", 0)
-            .attr("y", 8)
-            .attr("id", "depression-text");
+            let statePaths_dep = map_dep.selectAll("path.state")
+              .data(states.features)
+              .join("path")
+              .attr("class", "state")
+              .attr("note", d => d.id)
+              .attr("d", path_dep)
+              .attr("fill", function (d) {
+                return depression_color_scale(depression_data_map[d.id]);
+              })
 
-          const changeMesh = map_change.append("path")
-            .attr("class", "change-mesh")
-            .style("stroke", "none")
-            .style("fill", "none");
+            let statePaths_change = map_change.selectAll("path.state")
+              .data(states.features)
+              .join("path")
+              .attr("class", "state")
+              .attr("note", d => d.id)
+              .attr("d", path_change)
+              .attr("fill", function (d) {
+                if (mode == 1) {
+                  return temp_color_scale(temp_data_map[d.id]);
+                }
+                else if (mode == 2) {
+                  return sunlight_color_scale(sunlight_data_map[d.id]);
+                }
+                else if (mode == 3) {
+                  return income_color_scale(income_data_map[d.id]);
+                }
+              })
 
-          let tooltip2 = map_change.append("g")
-            .attr("class", "tooltip2")
-            .attr("visibility", "hidden");
+            map_dep.append("path")
+              .datum(statesMesh)
+              .attr("class", "outline")
+              .attr("d", path_dep);
 
-          tooltip2.append("rect")
-            .attr("fill", "black")
-            .attr("opacity", 0.2)
-            .attr("y", 0)
-            .attr("width", tooltipWidth)
-            .attr("height", tooltipHeight)
-            .attr("rx", 10);
-
-          tooltip2.append("text")
-            .attr("fill", "white")
-            .attr("text-anchor", "middle")
-            .attr("alignment-baseline", "hanging")
-            .attr("x", 0)
-            .attr("y", 8)
-            .attr("id", "change-text");
-
-
-          map_dep.selectAll("path.state")
-            .on("mouseover", function (event, d) {
-              const depression_val = depression_data_map[d.id]
-              console.log(depression_val)
-
-              tooltip1.style("visibility", "visible")
-
-              const [x, y] = d3.pointer(event);
-
-              const xPos = x;
-              const yPos = y - 25;
-
-              tooltip1.attr("transform", `translate(${xPos},${yPos})`);
-
-              tooltip1.select("#depression-text")
-                .text(`${depression_val}`);
-
-              const textElement = tooltip1.select("#depression-text");
-              const textBoundingBox = textElement.node().getBBox();
-              const tooltipWidth = textBoundingBox.width + 20;
-
-              tooltip1.select("rect")
-                .attr("width", tooltipWidth)
-                .attr("height", tooltipHeight);
-
-              textElement
-                .attr("x", tooltipWidth / 2)
-
-              depressionMesh.attr("d", path_dep(d))
-                .style("stroke", "darkblue")
-                .style("stroke-width", 3);
-
-            })
-            .on("mouseout", function () {
-              tooltip1.style("visibility", "hidden");
-              depressionMesh.style("stroke", "none").style("stroke-width", 0);
-
-            });
+            map_change.append("path")
+              .datum(statesMesh)
+              .attr("class", "outline")
+              .attr("d", path_change);
 
 
-          map_change.selectAll("path.state")
-            .on("mouseover", function (event, d) {
-              const temp_val = temp_data_map[d.id]
-              const sunlight_val = d3.format(",")(sunlight_data_map[d.id])
-              const income_val = d3.format(",.2f")(income_data_map[d.id])
+            let tooltipWidth = 100;
+            let tooltipHeight = 25;
 
-              tooltip2.style("visibility", "visible")
+            const depressionMesh = map_dep.append("path")
+              .attr("class", "depression-mesh")
+              .style("stroke", "none")
+              .style("fill", "none");
+
+            let tooltip1 = map_dep.append("g")
+              .attr("class", "tooltip1")
+              .attr("visibility", "hidden");
+
+            tooltip1.append("rect")
+              .attr("fill", "black")
+              .attr("opacity", 0.2)
+              .attr("y", 0)
+              .attr("width", tooltipWidth)
+              .attr("height", tooltipHeight)
+              .attr("rx", 10);
+
+            tooltip1.append("text")
+              .attr("fill", "white")
+              .attr("text-anchor", "middle")
+              .attr("alignment-baseline", "hanging")
+              .attr("x", 0)
+              .attr("y", 8)
+              .attr("id", "depression-text");
+
+            const changeMesh = map_change.append("path")
+              .attr("class", "change-mesh")
+              .style("stroke", "none")
+              .style("fill", "none");
+
+            let tooltip2 = map_change.append("g")
+              .attr("class", "tooltip2")
+              .attr("visibility", "hidden");
+
+            tooltip2.append("rect")
+              .attr("fill", "black")
+              .attr("opacity", 0.2)
+              .attr("y", 0)
+              .attr("width", tooltipWidth)
+              .attr("height", tooltipHeight)
+              .attr("rx", 10);
+
+            tooltip2.append("text")
+              .attr("fill", "white")
+              .attr("text-anchor", "middle")
+              .attr("alignment-baseline", "hanging")
+              .attr("x", 0)
+              .attr("y", 8)
+              .attr("id", "change-text");
 
 
-              const [x, y] = d3.pointer(event);
+            map_dep.selectAll("path.state")
+              .on("mouseover", function (event, d) {
+                const depression_val = depression_data_map[d.id]
+                console.log(depression_val)
 
-              const xPos = x;
-              const yPos = y - 25;
+                tooltip1.style("visibility", "visible")
+
+                const [x, y] = d3.pointer(event);
+
+                const xPos = x;
+                const yPos = y - 25;
+
+                tooltip1.attr("transform", `translate(${xPos},${yPos})`);
+
+                tooltip1.select("#depression-text")
+                  .text(`${depression_val}`);
+
+                const textElement = tooltip1.select("#depression-text");
+                const textBoundingBox = textElement.node().getBBox();
+                const tooltipWidth = textBoundingBox.width + 20;
+
+                tooltip1.select("rect")
+                  .attr("width", tooltipWidth)
+                  .attr("height", tooltipHeight);
+
+                textElement
+                  .attr("x", tooltipWidth / 2)
+
+                depressionMesh.attr("d", path_dep(d))
+                  .style("stroke", "darkblue")
+                  .style("stroke-width", 3);
+
+              })
+              .on("mouseout", function () {
+                tooltip1.style("visibility", "hidden");
+                depressionMesh.style("stroke", "none").style("stroke-width", 0);
+
+              });
+
+
+            map_change.selectAll("path.state")
+              .on("mouseover", function (event, d) {
+                const temp_val = temp_data_map[d.id]
+                const sunlight_val = d3.format(",")(sunlight_data_map[d.id])
+                const income_val = d3.format(",.2f")(income_data_map[d.id])
+
+                tooltip2.style("visibility", "visible")
+
+
+                const [x, y] = d3.pointer(event);
+
+                const xPos = x;
+                const yPos = y - 25;
 
 
 
-              tooltip2.attr("transform", `translate(${xPos},${yPos})`);
+                tooltip2.attr("transform", `translate(${xPos},${yPos})`);
 
-              if (mode == 1) {
-                tooltip2.select("#change-text")
-                  .text(`${temp_val} \u00B0 F`);
-              }
-              else if (mode == 2) {
-                tooltip2.select("#change-text")
-                  .text(`${sunlight_val} Hrs`);
-              }
-              else if (mode == 3) {
-                tooltip2.select("#change-text")
-                  .text(`$${income_val}`);
-              }
+                if (mode == 1) {
+                  tooltip2.select("#change-text")
+                    .text(`${temp_val} \u00B0F`);
+                }
+                else if (mode == 2) {
+                  tooltip2.select("#change-text")
+                    .text(`${sunlight_val} Hrs`);
+                }
+                else if (mode == 3) {
+                  tooltip2.select("#change-text")
+                    .text(`$${income_val}`);
+                }
 
-              const textElement = tooltip2.select("#change-text");
-              const textBoundingBox = textElement.node().getBBox();
-              const tooltipWidth = textBoundingBox.width + 20; // Add some padding
+                const textElement = tooltip2.select("#change-text");
+                const textBoundingBox = textElement.node().getBBox();
+                const tooltipWidth = textBoundingBox.width + 20; // Add some padding
 
-              tooltip2.select("rect")
-                .attr("width", tooltipWidth) // Set the calculated width
-                .attr("height", tooltipHeight);
+                tooltip2.select("rect")
+                  .attr("width", tooltipWidth) // Set the calculated width
+                  .attr("height", tooltipHeight);
 
-              textElement
-                .attr("x", tooltipWidth / 2) // Center the text in the tooltip
+                textElement
+                  .attr("x", tooltipWidth / 2) // Center the text in the tooltip
 
 
-              changeMesh.attr("d", path_change(d))
-                .style("stroke", "darkblue")
-                .style("stroke-width", 3);
+                changeMesh.attr("d", path_change(d))
+                  .style("stroke", "darkblue")
+                  .style("stroke-width", 3);
 
-            })
-            .on("mouseout", function () {
-              tooltip2.style("visibility", "hidden");
-              changeMesh.style("stroke", "none").style("stroke-width", 0);
+              })
+              .on("mouseout", function () {
+                tooltip2.style("visibility", "hidden");
+                changeMesh.style("stroke", "none").style("stroke-width", 0);
 
-            });
+              });
 
+
+          }
+
+          d3.select("#temperatures").on("click", function (event) {
+            requestChoroplethData(1)
+            d3.select('#right')
+              .text('US Average Temperatures')
+            d3.selectAll('.data-sel').classed('active-sel', false);
+            d3.select(this).classed('active-sel', true);
+
+          });
+
+          d3.select("#sunlight").on("click", function (event) {
+            requestChoroplethData(2)
+            d3.select('#right')
+              .text('US Average Sunlight')
+            d3.selectAll('.data-sel').classed('active-sel', false);
+            d3.select(this).classed('active-sel', true);
+
+          });
+
+          d3.select("#income").on("click", function (event) {
+            requestChoroplethData(3)
+            d3.select('#right')
+              .text('US Median Income')
+            d3.selectAll('.data-sel').classed('active-sel', false);
+            d3.select(this).classed('active-sel', true);
+
+          });
+
+          d3.select("#temperatures").classed('active-sel', true);
+
+          requestChoroplethData(1);
+
+
+
+
+
+
+
+        </script>
+
+  </div>
+
+  <h1 id="chartTitle" class="chart-title">US Average Temperatures</h2>
+    <svg id="graph2" height="500" width="800"></svg>
+    <div class="buttons">
+      <button id="temperatures2" class="data-sel">Average Temperatures (F)</button>
+      <button id="sunlight2" class="data-sel">Average Sunlight (Hrs)</button>
+      <button id="income2" class="data-sel">Median Household Income ($)</button>
+    </div>
+
+    <script>
+      const svg2 = d3.select("svg#graph2");
+      const width2 = svg2.attr("width");
+      const height2 = svg2.attr("height");
+      const margin2 = { top: 10, right: 10, bottom: 60, left: 80 };
+      const chartWidth = width2 - margin2.left - margin2.right;
+      const chartHeight = height2 - margin2.top - margin2.bottom;
+
+      let annotations = svg2.append("g").attr("id", "annotations");
+      let chartArea = svg2.append("g").attr("id", "points")
+        .attr("transform", `translate(${margin2.left},${margin2.top})`);
+
+
+      const requestChartData = async function (mode) {
+        //Temperature Data Processing
+        var temp_data_map = {};
+        var temp_individual = [];
+        var temp_data_raw = await d3.csv("./data/average-temperatures-by-state.csv",
+          function (d) {
+            temp_data_map[d.numberCode] = d.averageTemperatureF;
+            temp_individual.push(d.averageTemperatureF);
+          });
+
+
+        //Depression Data Processing
+        var depression_data_map = {};
+        var depression_individual = [];
+        var depression_data_raw = await d3.csv("./data/depression-rates-by-state.csv",
+          function (d) {
+            depression_data_map[d.numberCode] = d.CrudeDepressionRate;
+            depression_individual.push(d.CrudeDepressionRate);
+          });
+
+        //Sunlight Data Processing
+        var sunlight_data_map = {};
+        var sunlight_individual = [];
+        var sunlight_data_raw = await d3.csv("./data/sunniest-states.csv",
+          function (d) {
+            sunlight_data_map[d.numberCode] = d.averageAnnualSunlight;
+            sunlight_individual.push(d.averageAnnualSunlight);
+          });
+        console.log(sunlight_data_map)
+
+        //Income Data Processing
+        var income_data_map = {};
+        var income_individual = [];
+        var income_data_raw = await d3.csv("./data/median-household-income-by-state.csv",
+          function (d) {
+            income_data_map[d.numberCode] = d.medianHouseholdIncome2021;
+            income_individual.push(d.medianHouseholdIncome2021);
+          });
+        console.log(income_data_map)
+
+        const xScale = d3.scaleLinear()
+          .domain([0, d3.max(depression_individual)])
+          .range([0, chartWidth]);
+
+        var selectedMap;
+        var selectedInd;
+
+        if (mode == 1) {
+          selectedMap = temp_data_map;
+          selectedInd = temp_individual;
+        }
+        else if (mode == 2) {
+          selectedMap = sunlight_data_map;
+          selectedInd = sunlight_individual
+        }
+        else if (mode == 3) {
+          selectedMap = income_data_map;
+          selectedInd = income_individual
+        }
+
+
+        const yScale = d3.scaleLinear()
+          .domain([0, d3.max(selectedInd)])
+          .range([chartHeight, 0]);
+
+        chartArea.append("g")
+          .attr("class", "grid")
+          .call(d3.axisLeft(yScale).tickSize(-chartWidth).tickFormat(""))
+          .call(g => g.select(".domain").remove()) // Remove the axis line
+          .call(g => g.selectAll(".tick:not(:first-of-type) line").attr("stroke-opacity", 0.5)); // Add opacity to the gridlines
+
+
+        chartArea.append("g")
+          .attr("class", "grid")
+          .call(d3.axisBottom(xScale).tickSize(chartHeight).tickFormat(""))
+          .call(g => g.select(".domain").remove()) // Remove the axis line
+          .call(g => g.selectAll(".tick:not(:first-of-type) line").attr("stroke-opacity", 0.5)); // Add opacity to the gridlines
+
+
+        // Iterate through depression_data_map
+        for (const key in depression_data_map) {
+          if (selectedMap[key]) {
+            const depressionValue = depression_data_map[key];
+            const tempValue = selectedMap[key];
+
+            // Create a data point object
+            const dataPoint = { x: depressionValue, y: tempValue };
+
+            // Add the data point to your scatter plot
+            chartArea.append("circle")
+              .attr("cx", xScale(dataPoint.x)) // You need to define xScale
+              .attr("cy", yScale(dataPoint.y)) // You need to define yScale
+              .attr("r", 5) // Radius of the circle
+              .attr("fill", "blue") // Color of the circle (you can change this)
+
+            // You can also add labels or tooltips to the points to display the values.
+            console.log(dataPoint)
+
+
+
+          }
 
         }
 
-        d3.select("#temperatures").on("click", function (event) {
-          requestChoroplethData(1)
-          d3.select('#right')
-            .text('US Average Temperatures')
-          d3.selectAll('.data-sel').classed('active-sel', false);
-          d3.select(this).classed('active-sel', true);
+        chartArea.append("g")
+          .attr("transform", `translate(0, ${chartHeight})`)
+          .call(d3.axisBottom(xScale));
 
-        });
-
-        d3.select("#sunlight").on("click", function (event) {
-          requestChoroplethData(2)
-          d3.select('#right')
-            .text('US Average Sunlight')
-          d3.selectAll('.data-sel').classed('active-sel', false);
-          d3.select(this).classed('active-sel', true);
-
-        });
-
-        d3.select("#income").on("click", function (event) {
-          requestChoroplethData(3)
-          d3.select('#right')
-            .text('US Median Income')
-          d3.selectAll('.data-sel').classed('active-sel', false);
-          d3.select(this).classed('active-sel', true);
-
-        });
-
-        d3.select("#temperatures").classed('active-sel', true);
-
-        requestChoroplethData(1);
+        chartArea.append("g")
+          .call(d3.axisLeft(yScale));
 
 
 
 
+      }
 
+      function clearChart() {
+        chartArea.selectAll("circle").remove();
+        chartArea.selectAll(".grid").remove();
+        chartArea.selectAll("g").remove();
+      }
 
+      d3.select("#temperatures2").on("click", function (event) {
+        clearChart();
+        requestChartData(1)
+        d3.select('#chartTitle')
+          .text('US Average Temperatures')
+        d3.selectAll('.data-sel').classed('active-sel', false);
+        d3.select(this).classed('active-sel', true);
 
-      </script>
-</div>
+      });
+
+      d3.select("#sunlight2").on("click", function (event) {
+        clearChart();
+        requestChartData(2)
+        d3.select('#chartTitle')
+          .text('US Average Sunlight')
+        d3.selectAll('.data-sel').classed('active-sel', false);
+        d3.select(this).classed('active-sel', true);
+
+      });
+
+      d3.select("#income2").on("click", function (event) {
+        clearChart();
+        requestChartData(3)
+        d3.select('#chartTitle')
+          .text('US Median Income')
+        d3.selectAll('.data-sel').classed('active-sel', false);
+        d3.select(this).classed('active-sel', true);
+
+      });
+
+      d3.select("#temperatures2").classed('active-sel', true);
+      clearChart();
+      requestChartData(1);
+    </script>
+
+</body>
+
 
 </html>
