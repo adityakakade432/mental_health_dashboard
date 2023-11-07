@@ -5,6 +5,10 @@
   <script src="https://d3js.org/topojson.v3.min.js"></script>
 
   <style>
+    body {
+      font-family: sans-serif;
+    }
+
     #choropleth_dep {
       outline: 5px solid rgb(180, 223, 230);
       grid-column: 1;
@@ -13,6 +17,13 @@
     }
 
     #choropleth_change {
+      outline: 5px solid rgb(180, 223, 230);
+      grid-column: 1;
+      margin: auto;
+      border-radius: 20px;
+    }
+
+    #graph2 {
       outline: 5px solid rgb(180, 223, 230);
       grid-column: 2;
       margin: auto;
@@ -34,7 +45,6 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
 
     .data-sel {
@@ -63,12 +73,22 @@
       background-color: rgb(130, 179, 236);
     }
 
-    .left-title {
+    .dep-title {
+      text-align: center;
       grid-column: 1;
       margin: auto;
+      font-family: sans-serif;
     }
 
-    .right-title {
+    .change-title {
+      text-align: center;
+      grid-column: 1;
+      margin: auto;
+      font-family: sans-serif;
+    }
+
+    .chart-title {
+      text-align: center;
       grid-column: 2;
       margin: auto;
     }
@@ -100,29 +120,35 @@
     .grid line {
       stroke: #e6e6e6;
     }
+
+    .column {
+      margin: auto;
+    }
   </style>
 </head>
 
 <body>
 
   <div class="wrapper">
-    <h1 id="overall-title" class="overall-title">Mental Health Across The US</h1>
-    <p class="title-description">Different aspects and disorders related to mental health such as depression, anxiety, &
-      bipolar disorder<br> are all
-      prevalent in the United States.
-      Are these influenced by or correlated with geographical factors such <br> as temperature and hours of sunlight, or
-      even
-      economical factors like median household income?
-    </p>
-    <h2 id="left" class="left-title">US Depression Rates</h2>
-    <h2 id="right" class="right-title">US Average Temperatures</h2>
-    <svg id="choropleth_dep" height="500" width="650" style="background: rgb(255, 255, 255); margin-top:20px"></svg>
-    <svg id="choropleth_change" height="500" width="650" style="background: rgb(255, 255, 255); margin-top:20px"></svg>
 
-    <div class="buttons">
-      <button id="temperatures" class="data-sel">Average Temperatures (F)</button>
-      <button id="sunlight" class="data-sel">Average Sunlight (Hrs)</button>
-      <button id="income" class="data-sel">Median Household Income ($)</button>
+    <div class="column">
+      <h1 id="depMap" class="dep-title">US Depression Rates</h1>
+      <svg id="choropleth_dep" height="250" width="650"
+        style="background: rgb(255, 255, 255); margin-bottom:25px; margin-top:10px"></svg>
+      <h1 id="changeMap" class="change-title">US Average Temperatures</h1>
+      <svg id="choropleth_change" height="250" width="650"
+        style="background: rgb(255, 255, 255); margin-top:10px"></svg>
+    </div>
+
+    <div class="column">
+      <h1 id="chartTitle" class="chart-title">Temperature vs. Depression</h1>
+      <svg id="graph2" height="475" width="650"
+        style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:10px"></svg>
+      <div class="buttons">
+        <button id="temperatures" class="data-sel">Average Temperatures (F)</button>
+        <button id="sunlight" class="data-sel">Average Sunlight (Hrs)</button>
+        <button id="income" class="data-sel">Median Household Income ($)</button>
+      </div>
     </div>
 
     <script>
@@ -155,6 +181,8 @@
 
         var path_dep = d3.geoPath().projection(projection_dep);
         var path_change = d3.geoPath().projection(projection_dep);
+
+        const stateNum = { 1: "Alabama", 2: "Alaska", 4: "Arizona", 5: "Arkansas", 6: "California", 8: "Colorado", 9: "Connecticut", 10: "Delaware", 12: "Florida", 13: "Georgia", 15: "Hawaii", 16: "Idaho", 17: "Illinois", 18: "Indiana", 19: "Iowa", 20: "Kansas", 21: "Kentucky", 22: "Louisiana", 23: "Maine", 24: "Maryland", 25: "Massachusetts", 26: "Michigan", 27: "Minnesota", 28: "Mississippi", 29: "Missouri", 30: "Montana", 31: "Nebraska", 32: "Nevada", 33: "New Hampshire", 34: "New Jersey", 35: "New Mexico", 36: "New York", 37: "North Carolina", 38: "North Dakota", 39: "Ohio", 40: "Oklahoma", 41: "Oregon", 42: "Pennsylvania", 44: "Rhode Island", 45: "South Carolina", 46: "South Dakota", 47: "Tennessee", 48: "Texas", 49: "Utah", 50: "Vermont", 51: "Virginia", 53: "Washington", 54: "West Virginia", 55: "Wisconsin", 56: "Wyoming" };
 
         //Temperature Data Processing
         var temp_data_map = {};
@@ -256,7 +284,7 @@
 
         tooltip1.append("rect")
           .attr("fill", "black")
-          .attr("opacity", 0.2)
+          .attr("opacity", 0.5)
           .attr("y", 0)
           .attr("width", tooltipWidth)
           .attr("height", tooltipHeight)
@@ -281,7 +309,7 @@
 
         tooltip2.append("rect")
           .attr("fill", "black")
-          .attr("opacity", 0.2)
+          .attr("opacity", 0.5)
           .attr("y", 0)
           .attr("width", tooltipWidth)
           .attr("height", tooltipHeight)
@@ -305,17 +333,26 @@
 
             const [x, y] = d3.pointer(event);
 
-            const xPos = x;
-            const yPos = y - 25;
-
-            tooltip1.attr("transform", `translate(${xPos},${yPos})`);
+            var xPos = x;
+            var yPos = y - 25;
 
             tooltip1.select("#depression-text")
-              .text(`${depression_val}`);
+              .text(`${stateNum[d.id]}: ${depression_val}`);
 
             const textElement = tooltip1.select("#depression-text");
             const textBoundingBox = textElement.node().getBBox();
             const tooltipWidth = textBoundingBox.width + 20;
+
+
+
+            if (xPos + tooltipWidth > width_dep) {
+              console.log(xPos);
+              xPos -= tooltipWidth;
+              console.log(xPos);
+            }
+
+
+            tooltip1.attr("transform", `translate(${xPos},${yPos})`);
 
             tooltip1.select("rect")
               .attr("width", tooltipWidth)
@@ -347,29 +384,35 @@
 
             const [x, y] = d3.pointer(event);
 
-            const xPos = x;
-            const yPos = y - 25;
+            var xPos = x;
+            var yPos = y - 25;
 
 
-
-            tooltip2.attr("transform", `translate(${xPos},${yPos})`);
 
             if (mode == 1) {
               tooltip2.select("#change-text")
-                .text(`${temp_val} \u00B0F`);
+                .text(`${stateNum[d.id]}: ${temp_val} \u00B0F`);
             }
             else if (mode == 2) {
               tooltip2.select("#change-text")
-                .text(`${sunlight_val} Hrs`);
+                .text(`${stateNum[d.id]}: ${sunlight_val} Hrs`);
             }
             else if (mode == 3) {
               tooltip2.select("#change-text")
-                .text(`$${income_val}`);
+                .text(`${stateNum[d.id]}: $${income_val}`);
             }
 
             const textElement = tooltip2.select("#change-text");
             const textBoundingBox = textElement.node().getBBox();
             const tooltipWidth = textBoundingBox.width + 20; // Add some padding
+
+            if (xPos + tooltipWidth > width_dep) {
+              console.log(xPos);
+              xPos -= (tooltipWidth + 25);
+              console.log(xPos);
+            }
+
+            tooltip2.attr("transform", `translate(${xPos},${yPos})`);
 
             tooltip2.select("rect")
               .attr("width", tooltipWidth) // Set the calculated width
@@ -393,60 +436,49 @@
 
       }
 
-      d3.select("#temperatures").on("click", function (event) {
-        requestChoroplethData(1)
-        d3.select('#right')
-          .text('US Average Temperatures')
-        d3.selectAll('.data-sel').classed('active-sel', false);
-        d3.select(this).classed('active-sel', true);
 
-      });
 
-      d3.select("#sunlight").on("click", function (event) {
-        requestChoroplethData(2)
-        d3.select('#right')
-          .text('US Average Sunlight')
-        d3.selectAll('.data-sel').classed('active-sel', false);
-        d3.select(this).classed('active-sel', true);
-
-      });
-
-      d3.select("#income").on("click", function (event) {
-        requestChoroplethData(3)
-        d3.select('#right')
-          .text('US Median Income')
-        d3.selectAll('.data-sel').classed('active-sel', false);
-        d3.select(this).classed('active-sel', true);
-
-      });
-
-      d3.select("#temperatures").classed('active-sel', true);
-
-      requestChoroplethData(1);
-
-    </script>
-
-  </div>
-
-  <h1 id="chartTitle" class="chart-title">US Average Temperatures</h2>
-    <svg id="graph2" height="500" width="650"></svg>
-    <div class="buttons">
-      <button id="temperatures2" class="data-sel">Average Temperatures (F)</button>
-      <button id="sunlight2" class="data-sel">Average Sunlight (Hrs)</button>
-      <button id="income2" class="data-sel">Median Household Income ($)</button>
-    </div>
-
-    <script>
       const svg2 = d3.select("svg#graph2");
       const width2 = svg2.attr("width");
       const height2 = svg2.attr("height");
-      const margin2 = { top: 10, right: 10, bottom: 60, left: 80 };
+      const margin2 = { top: 40, right: 40, bottom: 50, left: 50 };
       const chartWidth = width2 - margin2.left - margin2.right;
       const chartHeight = height2 - margin2.top - margin2.bottom;
 
       let annotations = svg2.append("g").attr("id", "annotations");
       let chartArea = svg2.append("g").attr("id", "points")
         .attr("transform", `translate(${margin2.left},${margin2.top})`);
+
+      function calculatePearsonCorrelation(xValues, yValues) {
+        if (xValues.length !== yValues.length) {
+          throw new Error("Input arrays must have the same length");
+        }
+
+        // Calculate the means of x and y
+        const xMean = xValues.reduce((acc, x) => acc + x, 0) / xValues.length;
+        const yMean = yValues.reduce((acc, y) => acc + y, 0) / yValues.length;
+
+
+        // Calculate the sums of the products and squared deviations
+        let sumOfProducts = 0;
+        let sumOfSquaredDeviationsX = 0;
+        let sumOfSquaredDeviationsY = 0;
+
+        for (let i = 0; i < xValues.length; i++) {
+          const deviationX = xValues[i] - xMean;
+          const deviationY = yValues[i] - yMean;
+
+          sumOfProducts += deviationX * deviationY;
+          sumOfSquaredDeviationsX += deviationX ** 2;
+          sumOfSquaredDeviationsY += deviationY ** 2;
+        }
+
+        // Calculate the Pearson correlation coefficient
+        const r = sumOfProducts / (Math.sqrt(sumOfSquaredDeviationsX) * Math.sqrt(sumOfSquaredDeviationsY));
+
+
+        return r;
+      }
 
 
       const requestChartData = async function (mode) {
@@ -490,7 +522,7 @@
         console.log(income_data_map)
 
         const xScale = d3.scaleLinear()
-          .domain([0, d3.max(depression_individual)])
+          .domain([d3.min(depression_individual) - 1, d3.max(depression_individual) + 1])
           .range([0, chartWidth]);
 
         var selectedMap;
@@ -511,47 +543,47 @@
 
 
         const yScale = d3.scaleLinear()
-          .domain([0, d3.max(selectedInd)])
+          .domain([d3.min(selectedInd), d3.max(selectedInd)])
           .range([chartHeight, 0]);
 
         chartArea.append("g")
           .attr("class", "grid")
           .call(d3.axisLeft(yScale).tickSize(-chartWidth).tickFormat(""))
-          .call(g => g.select(".domain").remove()) // Remove the axis line
-          .call(g => g.selectAll(".tick:not(:first-of-type) line").attr("stroke-opacity", 0.5)); // Add opacity to the gridlines
+          .call(g => g.select(".domain").remove())
+          .call(g => g.selectAll(".tick:not(:first-of-type) line").attr("stroke-opacity", 0.5));
 
 
         chartArea.append("g")
           .attr("class", "grid")
           .call(d3.axisBottom(xScale).tickSize(chartHeight).tickFormat(""))
-          .call(g => g.select(".domain").remove()) // Remove the axis line
-          .call(g => g.selectAll(".tick:not(:first-of-type) line").attr("stroke-opacity", 0.5)); // Add opacity to the gridlines
+          .call(g => g.select(".domain").remove())
+          .call(g => g.selectAll(".tick:not(:first-of-type) line").attr("stroke-opacity", 0.5));
 
-
-        // Iterate through depression_data_map
+        var xValues = [];
+        var yValues = [];
         for (const key in depression_data_map) {
           if (selectedMap[key]) {
             const depressionValue = depression_data_map[key];
             const tempValue = selectedMap[key];
 
-            // Create a data point object
             const dataPoint = { x: depressionValue, y: tempValue };
 
-            // Add the data point to your scatter plot
+            xValues.push(parseFloat(selectedMap[key]))
+            yValues.push(parseFloat(depression_data_map[key]))
+
             chartArea.append("circle")
-              .attr("cx", xScale(dataPoint.x)) // You need to define xScale
-              .attr("cy", yScale(dataPoint.y)) // You need to define yScale
-              .attr("r", 5) // Radius of the circle
-              .attr("fill", "blue") // Color of the circle (you can change this)
+              .attr("cx", xScale(dataPoint.x))
+              .attr("cy", yScale(dataPoint.y))
+              .attr("r", 3)
+              .attr("fill", "#7cf7d0")
 
-            // You can also add labels or tooltips to the points to display the values.
             console.log(dataPoint)
-
 
 
           }
 
         }
+        const correlationCoefficient = calculatePearsonCorrelation(xValues, yValues);
 
         chartArea.append("g")
           .attr("transform", `translate(0, ${chartHeight})`)
@@ -560,8 +592,27 @@
         chartArea.append("g")
           .call(d3.axisLeft(yScale));
 
+        const legend = chartArea.append("g")
+          .attr("class", "legend")
+
+        legend.append("rect")
+          .attr("x", 20)
+          .attr("y", 325)
+          .attr("width", 220)
+          .attr("height", 34)
+          .attr("fill", "black")
+          .attr("opacity", "0.5")
+          .attr("rx", "10");
 
 
+
+        legend.append("text")
+          .attr("fill", "white")
+          .attr("x", 20 + 110)
+          .attr("y", 325 + 17)
+          .attr("text-anchor", "middle") // Center the text horizontally
+          .attr("alignment-baseline", "middle")
+          .text("Pearson Correlation: " + d3.format(".3f")(correlationCoefficient));
 
       }
 
@@ -571,40 +622,63 @@
         chartArea.selectAll("g").remove();
       }
 
-      d3.select("#temperatures2").on("click", function (event) {
+
+
+      d3.select("#temperatures").on("click", function (event) {
         clearChart();
         requestChartData(1)
-        d3.select('#chartTitle')
+        d3.selectAll('.data-sel').classed('active-sel', false);
+        d3.select(this).classed('active-sel', true);
+        requestChoroplethData(1)
+        d3.select('#changeMap')
           .text('US Average Temperatures')
+        d3.select('#chartTitle')
+          .text('Temperature vs. Depression')
         d3.selectAll('.data-sel').classed('active-sel', false);
         d3.select(this).classed('active-sel', true);
 
       });
 
-      d3.select("#sunlight2").on("click", function (event) {
+      d3.select("#sunlight").on("click", function (event) {
         clearChart();
         requestChartData(2)
-        d3.select('#chartTitle')
+        d3.selectAll('.data-sel').classed('active-sel', false);
+        d3.select(this).classed('active-sel', true);
+        requestChoroplethData(2)
+        d3.select('#changeMap')
           .text('US Average Sunlight')
+        d3.select('#chartTitle')
+          .text('Sunlight vs. Depression')
         d3.selectAll('.data-sel').classed('active-sel', false);
         d3.select(this).classed('active-sel', true);
 
       });
 
-      d3.select("#income2").on("click", function (event) {
+      d3.select("#income").on("click", function (event) {
         clearChart();
         requestChartData(3)
-        d3.select('#chartTitle')
+        d3.selectAll('.data-sel').classed('active-sel', false);
+        d3.select(this).classed('active-sel', true);
+        requestChoroplethData(3)
+        d3.select('#changeMap')
           .text('US Median Income')
+        d3.select('#chartTitle')
+          .text('Income vs. Depression')
         d3.selectAll('.data-sel').classed('active-sel', false);
         d3.select(this).classed('active-sel', true);
 
       });
 
-      d3.select("#temperatures2").classed('active-sel', true);
+      d3.select("#temperatures").classed('active-sel', true);
+      d3.select("#temperatures").classed('active-sel', true);
       clearChart();
+      requestChoroplethData(1);
       requestChartData(1);
     </script>
+
+  </div>
+
+
 
 </body>
 
