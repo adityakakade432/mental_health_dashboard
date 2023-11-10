@@ -3,11 +3,15 @@
 <head>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/topojson.v3.min.js"></script>
-  <script src="https://d3js.org/d3-contour.v3.min.js"></script>
+<script src="https://d3js.org/d3-contour.v3.min.js"></script>
 
   <style>
     body {
       font-family: sans-serif;
+    }
+
+    h1 {
+      text-align: center;
     }
 
     #choropleth_dep {
@@ -56,10 +60,17 @@
       stroke-width: 2px;
     }
 
+    .vis1{      
+      background-color: rgb(203, 247, 255);      
+      padding-bottom: 60px;
+      padding-top: 40px;
+    }
+
     .wrapper {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
+      padding-top: 20px;
     }
 
     .data-sel {
@@ -151,28 +162,31 @@
 </head>
 
 <body>
-
+  <div class = "vis1">
+  <h1 style="margin: auto;">Correlation of Depression Rates to Various Factors </h1>
   <div class="wrapper">
+    
+      <div class="column">
+        <h2 id="depMap" class="dep-title">US Depression Rates</h2>
+        <svg id="choropleth_dep" height="250" width="650"
+          style="background: rgb(255, 255, 255); margin-bottom:25px; margin-top:10px"></svg>
+        <h2 id="changeMap" class="change-title">US Average Temperatures</h2>
+        <svg id="choropleth_change" height="250" width="650"
+          style="background: rgb(255, 255, 255); margin-top:10px"></svg>
+            </div>
 
-    <div class="column">
-      <h1 id="depMap" class="dep-title">US Depression Rates</h1>
-      <svg id="choropleth_dep" height="250" width="650"
-        style="background: rgb(255, 255, 255); margin-bottom:25px; margin-top:10px"></svg>
-      <h1 id="changeMap" class="change-title">US Average Temperatures</h1>
-      <svg id="choropleth_change" height="250" width="650"
-        style="background: rgb(255, 255, 255); margin-top:10px"></svg>
-    </div>
-
-    <div class="column">
-      <h1 id="chartTitle" class="chart-title">Temperature vs. Depression</h1>
-      <svg id="graph2" height="475" width="650"
-        style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:10px"></svg>
-      <div class="buttons">
-        <button id="temperatures" class="data-sel">Average Temperatures (F)</button>
-        <button id="sunlight" class="data-sel">Average Sunlight (Hrs)</button>
-        <button id="income" class="data-sel">Median Household Income ($)</button>
+      <div class="column">
+        <h2 id="chartTitle" class="chart-title">Temperature vs. Depression</h2>
+        <svg id="graph2" height="475" width="650"
+          style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:10px"></svg>
+        <div class="buttons">
+          <button id="temperatures" class="data-sel">Average Temperatures (F)</button>
+          <button id="sunlight" class="data-sel">Average Sunlight (Hrs)</button>
+          <button id="income" class="data-sel">Median Household Income ($)</button>
+        </div>
       </div>
-    </div>
+  </div>
+</div>
 
     <script>
       const svg_dep = d3.select("#choropleth_dep");
@@ -745,7 +759,8 @@
       requestChartData(1);
 
     </script>
-    <div class="lollipop">
+   
+   <div class="lollipop">
       <h1 id="Title" class="chart-title">Mental Healths Stats vs Yearly Temperature</h1>
       <svg id="lollipop" height="600" width="700"
         style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:20px"></svg>
@@ -784,7 +799,7 @@
         const colorScale = d3.scaleOrdinal(d3.schemePuBuGn[9]).domain(data.map(d => d.Temp) );
         const lollipops = chart_l.selectAll(".lollipop").data(data).join("g").attr("class", "lollipop"); 
         d3.select("#Anxiety").on("click", () => {
-          svg_l.selectAll("text").remove();
+svg_l.selectAll("text").remove();
           xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
           svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 3).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
           .text(" Anxiety Disorders (Share of Population)");
@@ -849,7 +864,7 @@
 
         });
         d3.select("#Depression").on("click", () => {
-          svg_l.selectAll('text').remove();
+svg_l.selectAll('text').remove();
           xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
           svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 3).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
           .text(" Depressive Disorders (Share of Population)");
@@ -911,7 +926,7 @@
 
         });
         d3.select("#Bipolar").on("click", () => {
-          svg_l.selectAll('text').remove();
+svg_l.selectAll('text').remove();
           xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
           svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 1.5).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
           .text(" Bipolar Disorders (Share of Population)");
@@ -1017,7 +1032,7 @@
       
     </script>
 
-    <div class="column">
+<div class="column">
       <h1 id="scatterTitle" class="chart-title">Hours of Sleep vs. Mental Health</h1>
       <svg id="scatter" height="600" width="700"
         style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:10px"></svg>
@@ -1026,9 +1041,9 @@
         <button id="weight" class="data-sel">Body Weight (lbs)</button>
         <button id="alcohol" class="data-sel">Alcohol Consumption</button>
       </div>
-    </div>
+  </div>
 
-    <script>
+<script>
 
       const svg_s = d3.select("svg#scatter");
       const width_s = svg_s.attr("width");
