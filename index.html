@@ -199,6 +199,7 @@
     .gridlines line {
       stroke: lightgray;
     }
+
   </style>
 </head>
 
@@ -641,6 +642,7 @@
           yValues.push(parseFloat(depression_data_map[key]))
 
           chartArea.append("circle")
+            .attr("class", "vis1-circle")
             .attr("cx", xScale(dataPoint.x))
             .attr("cy", yScale(dataPoint.y))
             .attr("r", 4)
@@ -1014,7 +1016,8 @@
   </script>
 
   <div class="vis3">
-    <h1 id="scatterTitle" class="chart-title">Hours of Sleep vs. Mental Health</h1>
+    <h1>Correlation of Poor Mental Health to Various Factors</h1>
+    <h2 id="scatterTitle" class="chart-title">Correlation of Poor Mental Health to Various Factors</h2>
     <svg id="scatter" height="500" width="700"
       style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:10px"></svg>
     <div class="buttons">
@@ -1029,7 +1032,7 @@
     const svg_s = d3.select("svg#scatter");
     const width_s = svg_s.attr("width");
     const height_s = svg_s.attr("height");
-    const margin_s = { top: 40, right: 40, bottom: 50, left: 50 };
+    const margin_s = { top: 40, right: 40, bottom: 65, left: 65 };
     const chartWidth_s = width_s - margin_s.left - margin_s.right;
     const chartHeight_s = height_s - margin_s.top - margin_s.bottom;
 
@@ -1101,7 +1104,7 @@
         chart_s.selectAll(".x.gridlines").remove();
         chart_s.selectAll("path").remove();
         d3.select('#scatterTitle')
-          .text('Hours of Sleep vs. Poor Mental Health')
+          .text('Poor Mental Health vs. Hours of Sleep')
 
         const sleep_scale = d3.scaleLinear().domain([0, 12]).range([0, chartWidth_s]);
         let sleep_axis = d3.axisBottom(sleep_scale);
@@ -1144,7 +1147,7 @@
         chart_s.selectAll(".x.gridlines").remove();
         chart_s.selectAll("path").remove();
         d3.select('#scatterTitle')
-          .text('Body Weight (lbs) vs. Poor Mental Health')
+          .text('Poor Mental Health vs. Body Weight (lbs)')
 
         const weight_scale = d3.scaleLinear().domain([0, 300]).range([0, chartWidth_s]);
         let weight_axis = d3.axisBottom(weight_scale);
@@ -1188,7 +1191,7 @@
         chart_s.selectAll(".x.gridlines").remove();
         chart_s.selectAll("path").remove();
         d3.select('#scatterTitle')
-          .text('Alcohol Consumption vs. Poor Mental Health')
+          .text('Poor Mental Health vs. Alcohol Consumption')
 
         const alc_scale = d3.scaleLinear().domain([-1, 6]).range([0, chartWidth_s]);
         let alc_axis = d3.axisBottom(alc_scale);
