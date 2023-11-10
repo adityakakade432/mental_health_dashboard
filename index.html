@@ -172,6 +172,8 @@
       const map_change = svg_change.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+      const stateNum = { 1: "Alabama", 2: "Alaska", 4: "Arizona", 5: "Arkansas", 6: "California", 8: "Colorado", 9: "Connecticut", 10: "Delaware", 12: "Florida", 13: "Georgia", 15: "Hawaii", 16: "Idaho", 17: "Illinois", 18: "Indiana", 19: "Iowa", 20: "Kansas", 21: "Kentucky", 22: "Louisiana", 23: "Maine", 24: "Maryland", 25: "Massachusetts", 26: "Michigan", 27: "Minnesota", 28: "Mississippi", 29: "Missouri", 30: "Montana", 31: "Nebraska", 32: "Nevada", 33: "New Hampshire", 34: "New Jersey", 35: "New Mexico", 36: "New York", 37: "North Carolina", 38: "North Dakota", 39: "Ohio", 40: "Oklahoma", 41: "Oregon", 42: "Pennsylvania", 44: "Rhode Island", 45: "South Carolina", 46: "South Dakota", 47: "Tennessee", 48: "Texas", 49: "Utah", 50: "Vermont", 51: "Virginia", 53: "Washington", 54: "West Virginia", 55: "Wisconsin", 56: "Wyoming" };
+
       const requestChoroplethData = async function (mode) {
         const us = await d3.json("./data/us.json");
         var states = topojson.feature(us, us.objects.states);
@@ -182,7 +184,15 @@
         var path_dep = d3.geoPath().projection(projection_dep);
         var path_change = d3.geoPath().projection(projection_dep);
 
-        const stateNum = { 1: "Alabama", 2: "Alaska", 4: "Arizona", 5: "Arkansas", 6: "California", 8: "Colorado", 9: "Connecticut", 10: "Delaware", 12: "Florida", 13: "Georgia", 15: "Hawaii", 16: "Idaho", 17: "Illinois", 18: "Indiana", 19: "Iowa", 20: "Kansas", 21: "Kentucky", 22: "Louisiana", 23: "Maine", 24: "Maryland", 25: "Massachusetts", 26: "Michigan", 27: "Minnesota", 28: "Mississippi", 29: "Missouri", 30: "Montana", 31: "Nebraska", 32: "Nevada", 33: "New Hampshire", 34: "New Jersey", 35: "New Mexico", 36: "New York", 37: "North Carolina", 38: "North Dakota", 39: "Ohio", 40: "Oklahoma", 41: "Oregon", 42: "Pennsylvania", 44: "Rhode Island", 45: "South Carolina", 46: "South Dakota", 47: "Tennessee", 48: "Texas", 49: "Utah", 50: "Vermont", 51: "Virginia", 53: "Washington", 54: "West Virginia", 55: "Wisconsin", 56: "Wyoming" };
+        //Depression Data Processing
+        var depression_data_map = {};
+        var depression_individual = [];
+        var depression_data_raw = await d3.csv("./data/depression-rates-by-state.csv",
+          function (d) {
+            depression_data_map[d.numberCode] = d.CrudeDepressionRate;
+            depression_individual.push(d.CrudeDepressionRate);
+          });
+        console.log(depression_data_map)
 
         //Temperature Data Processing
         var temp_data_map = {};
@@ -193,17 +203,6 @@
             temp_individual.push(d.averageTemperatureF);
           });
         console.log(temp_data_map)
-
-
-        //Depression Data Processing
-        var depression_data_map = {};
-        var depression_individual = [];
-        var depression_data_raw = await d3.csv("./data/depression-rates-by-state.csv",
-          function (d) {
-            depression_data_map[d.numberCode] = d.CrudeDepressionRate;
-            depression_individual.push(d.CrudeDepressionRate);
-          });
-        console.log(depression_data_map)
 
         //Sunlight Data Processing
         var sunlight_data_map = {};
@@ -343,14 +342,11 @@
             const textBoundingBox = textElement.node().getBBox();
             const tooltipWidth = textBoundingBox.width + 20;
 
-
-
             if (xPos + tooltipWidth > width_dep) {
               console.log(xPos);
               xPos -= tooltipWidth;
               console.log(xPos);
             }
-
 
             tooltip1.attr("transform", `translate(${xPos},${yPos})`);
 
@@ -377,17 +373,14 @@
           .on("mouseover", function (event, d) {
             const temp_val = temp_data_map[d.id]
             const sunlight_val = d3.format(",")(sunlight_data_map[d.id])
-            const income_val = d3.format(",.2f")(income_data_map[d.id])
+            const income_val = d3.format(",")(income_data_map[d.id])
 
             tooltip2.style("visibility", "visible")
-
 
             const [x, y] = d3.pointer(event);
 
             var xPos = x;
             var yPos = y - 25;
-
-
 
             if (mode == 1) {
               tooltip2.select("#change-text")
@@ -436,8 +429,6 @@
 
       }
 
-
-
       const svg2 = d3.select("svg#graph2");
       const width2 = svg2.attr("width");
       const height2 = svg2.attr("height");
@@ -450,14 +441,10 @@
         .attr("transform", `translate(${margin2.left},${margin2.top})`);
 
       function calculatePearsonCorrelation(xValues, yValues) {
-        if (xValues.length !== yValues.length) {
-          throw new Error("Input arrays must have the same length");
-        }
 
         // Calculate the means of x and y
         const xMean = xValues.reduce((acc, x) => acc + x, 0) / xValues.length;
         const yMean = yValues.reduce((acc, y) => acc + y, 0) / yValues.length;
-
 
         // Calculate the sums of the products and squared deviations
         let sumOfProducts = 0;
@@ -475,23 +462,12 @@
 
         // Calculate the Pearson correlation coefficient
         const r = sumOfProducts / (Math.sqrt(sumOfSquaredDeviationsX) * Math.sqrt(sumOfSquaredDeviationsY));
-
-
         return r;
       }
 
 
       const requestChartData = async function (mode) {
-        //Temperature Data Processing
-        var temp_data_map = {};
-        var temp_individual = [];
-        var temp_data_raw = await d3.csv("./data/average-temperatures-by-state.csv",
-          function (d) {
-            temp_data_map[d.numberCode] = d.averageTemperatureF;
-            temp_individual.push(d.averageTemperatureF);
-          });
-
-
+        
         //Depression Data Processing
         var depression_data_map = {};
         var depression_individual = [];
@@ -499,6 +475,15 @@
           function (d) {
             depression_data_map[d.numberCode] = d.CrudeDepressionRate;
             depression_individual.push(d.CrudeDepressionRate);
+          });
+
+        //Temperature Data Processing
+        var temp_data_map = {};
+        var temp_individual = [];
+        var temp_data_raw = await d3.csv("./data/average-temperatures-by-state.csv",
+          function (d) {
+            temp_data_map[d.numberCode] = d.averageTemperatureF;
+            temp_individual.push(d.averageTemperatureF);
           });
 
         //Sunlight Data Processing
@@ -541,7 +526,6 @@
           selectedInd = income_individual
         }
 
-
         const yScale = d3.scaleLinear()
           .domain([d3.min(selectedInd), d3.max(selectedInd)])
           .range([chartHeight, 0]);
@@ -552,15 +536,22 @@
           .call(g => g.select(".domain").remove())
           .call(g => g.selectAll(".tick:not(:first-of-type) line").attr("stroke-opacity", 0.5));
 
-
         chartArea.append("g")
           .attr("class", "grid")
           .call(d3.axisBottom(xScale).tickSize(chartHeight).tickFormat(""))
           .call(g => g.select(".domain").remove())
           .call(g => g.selectAll(".tick:not(:first-of-type) line").attr("stroke-opacity", 0.5));
 
+        chartArea.append("g")
+          .attr("transform", `translate(0, ${chartHeight})`)
+          .call(d3.axisBottom(xScale));
+
+        chartArea.append("g")
+          .call(d3.axisLeft(yScale));
+
         var xValues = [];
         var yValues = [];
+
         for (const key in depression_data_map) {
           if (selectedMap[key]) {
             const depressionValue = depression_data_map[key];
@@ -574,23 +565,17 @@
             chartArea.append("circle")
               .attr("cx", xScale(dataPoint.x))
               .attr("cy", yScale(dataPoint.y))
-              .attr("r", 3)
+              .attr("r", 4)
               .attr("fill", "#7cf7d0")
+              .attr("data-name", stateNum[key])
 
             console.log(dataPoint)
-
 
           }
 
         }
+
         const correlationCoefficient = calculatePearsonCorrelation(xValues, yValues);
-
-        chartArea.append("g")
-          .attr("transform", `translate(0, ${chartHeight})`)
-          .call(d3.axisBottom(xScale));
-
-        chartArea.append("g")
-          .call(d3.axisLeft(yScale));
 
         const legend = chartArea.append("g")
           .attr("class", "legend")
@@ -604,8 +589,6 @@
           .attr("opacity", "0.5")
           .attr("rx", "10");
 
-
-
         legend.append("text")
           .attr("fill", "white")
           .attr("x", 20 + 110)
@@ -614,6 +597,71 @@
           .attr("alignment-baseline", "middle")
           .text("Pearson Correlation: " + d3.format(".3f")(correlationCoefficient));
 
+        let tooltip3Width = 100;
+        let tooltip3Height = 25;
+
+        let tooltip3 = chartArea.append("g")
+          .attr("class", "tooltip3")
+          .attr("visibility", "hidden");
+
+        tooltip3.append("rect")
+          .attr("fill", "black")
+          .attr("opacity", 0.5)
+          .attr("y", 0)
+          .attr("width", tooltip3Width)
+          .attr("height", tooltip3Height)
+          .attr("rx", 10);
+
+        tooltip3.append("text")
+          .attr("fill", "white")
+          .attr("text-anchor", "middle")
+          .attr("alignment-baseline", "hanging")
+          .attr("x", 0)
+          .attr("y", 8)
+          .attr("id", "scatter-label");
+
+        chartArea.selectAll("circle")
+          .on("mouseover", function (event, d) {
+            const point = d3.select(this);
+            point.raise();
+            point.attr("r", 8)
+              .attr("fill", "#4d75f0");
+
+            tooltip3.style("visibility", "visible")
+
+            var xPos = parseFloat(point.attr("cx")) + 5;
+            var yPos = parseFloat(point.attr("cy")) - 30;
+
+            tooltip3.select("#scatter-label")
+              .text(`${point.attr("data-name")}`);
+
+            const textElement = tooltip3.select("#scatter-label");
+            const textBoundingBox = textElement.node().getBBox();
+            const tooltip3Width = textBoundingBox.width + 20;
+
+            if (xPos + tooltip3Width > width2 - 50) {
+              console.log(xPos);
+              xPos -= (tooltip3Width + 10);
+              console.log(xPos);
+            }
+
+            tooltip3.attr("transform", `translate(${xPos},${yPos})`);
+
+            tooltip3.select("rect")
+              .attr("width", tooltip3Width)
+              .attr("height", tooltip3Height);
+
+            textElement
+              .attr("x", tooltip3Width / 2)
+
+          })
+          .on("mouseout", function () {
+            tooltip3.style("visibility", "hidden");
+            const point = d3.select(this);
+            point.attr("r", 4)
+              .attr("fill", "#7cf7d0");
+          });
+
       }
 
       function clearChart() {
@@ -621,8 +669,6 @@
         chartArea.selectAll(".grid").remove();
         chartArea.selectAll("g").remove();
       }
-
-
 
       d3.select("#temperatures").on("click", function (event) {
         clearChart();
@@ -674,6 +720,7 @@
       clearChart();
       requestChoroplethData(1);
       requestChartData(1);
+
     </script>
 
   </div>
