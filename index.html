@@ -35,6 +35,13 @@
       border-radius: 20px;
     }
 
+    #lollipop {
+      outline: 5px solid rgb(180, 223, 230);
+      grid-column: 2;
+      margin: auto;
+      border-radius: 20px;
+    }
+
     .outline {
       fill: none;
       stroke: rgb(255, 255, 255);
@@ -721,6 +728,262 @@
       requestChoroplethData(1);
       requestChartData(1);
 
+    </script>
+    <div class="lollipop">
+      <h1 id="Title" class="chart-title">Mental Healths Stats vs Yearly Temperature</h1>
+      <svg id="lollipop" height="600" width="700"
+        style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:20px"></svg>
+      <div class="buttons">
+        <button id="Anxiety" class="data-sel">Anxiety</button>
+        <button id="Depression" class="data-sel">Depression</button>
+        <button id="Bipolar" class="data-sel">Bipolar</button>
+      </div>
+    </div>
+
+    <!-- <svg height="700" width="600" id="lollipop"></svg>
+
+    <button id="Anxiety">Anxiety</button>
+    <button id ="Depression">Depression</button>
+    <button id = "Bipolar">Bipolar</button> -->
+
+    <script>
+      let margin_l = { "top": 10, "right": 10, "bottom": 45, "left": 65};
+      let svg_l  = d3.select('svg#lollipop');
+      let width = svg_l.attr("width");
+      let height = svg_l.attr("height");
+      const chartWidth_l = width - margin_l.left - margin_l.right; 
+      const chartHeight_l = height - margin_l.top - margin_l.bottom;
+      const yAxisArea = svg_l.append("g").attr("transform",`translate(${margin_l.left-10},${margin_l.top})`);
+      const xAxisArea = svg_l.append("g").attr("transform",`translate(${margin_l.left},${chartHeight_l+10+margin_l.top})`);
+      let chart_l = svg_l.append("g").attr("id","points")
+                  .attr("transform",`translate(${margin.left},${margin.top})`);
+
+      
+      d3.csv("./data/Data-Climate.csv", d3.autotype).then( data => {
+        console.log(data); 
+        const scalePoint = d3.scalePoint().domain(d3.map(data, d => d['Year'])).range([10,chartWidth_l-10]).padding(0.2);
+        const yScale = d3.scaleLinear().range([chartHeight_l-10,10]);
+        let bottomAxis = d3.axisBottom(scalePoint); 
+        xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
+        const colorScale = d3.scaleOrdinal(d3.schemePuBuGn[9]).domain(data.map(d => d.Temp) );
+        const lollipops = chart_l.selectAll(".lollipop").data(data).join("g").attr("class", "lollipop"); 
+        d3.select("#Anxiety").on("click", () => {
+          yScale.domain(d3.extent(d3.map(data, d=>d.Anxiety))); 
+          let yAxis = d3.axisLeft(yScale); 
+          yAxisArea.transition().duration(1000).call(yAxis);
+          lollipops.each( function(d) {
+            cool = d3.select(this);
+            cool.selectAll("line").remove();
+            cool.selectAll("circle").remove();
+            line = cool.append("line")
+            .attr("id", "line")
+            .merge(cool)
+            .transition()
+            .duration(1000)
+            .attr("x1", scalePoint(d['Year'])+45)
+            .attr("x2", scalePoint(d['Year'])+45)
+            .attr("y1", chartHeight_l-10)
+            .attr("y2", yScale(d['Anxiety']))
+            .attr("stroke", "black")
+            .attr("stroke-width", "1px")
+
+            cool.append("circle")
+            .transition()
+            .duration(1000)
+            .attr("cx", scalePoint(d['Year'])+45)
+            .attr("cy", yScale(d['Anxiety']))
+            .attr("r", "8")
+            .style("fill", d => colorScale(d.Temp))
+            .attr("stroke", "black")
+            .attr("stroke-width", "1")
+
+       
+
+          }); 
+          let label=  chart_l.append("text");
+            lollipops.on("mouseover", mouseOver).on("mouseout", mouseOut);
+        
+            function mouseOver() {
+            d3.select(this).selectAll("circle").attr("stroke-width", 3); 
+            let d = d3.select(this).datum(); 
+            var xPos = scalePoint(d.Year)+ 15; 
+
+            temp = d['Temp']; 
+            //y2020 = percentScale(d['2020']);
+            label.text(temp +  '\u00B0F');
+            y = yScale(d['Anxiety']);
+
+            
+            label.attr("x",xPos+6).attr("y",y-10).attr("text-anchor","start");
+
+            label.attr("visibility","");
+            }
+            function mouseOut(){
+            d3.select(this).selectAll("circle").attr("stroke-width", 1);
+            label.attr("visibility","hidden");
+            
+        };
+
+          //yAxisArea.append("g").attr("class", "y axis").call(yAxis);//found on internet
+
+        });
+        d3.select("#Depression").on("click", () => {
+          yScale.domain(d3.extent(d3.map(data, d=>d.Depression))); 
+          let yAxis = d3.axisLeft(yScale);
+          yAxisArea.transition().duration(1000).call(yAxis); 
+          //const lollipops = chart_l.selectAll(".lollipop").data(data).join("g").attr("class", "lollipop"); 
+          lollipops.each( function(d) {
+            cool = d3.select(this);
+            cool.selectAll("line").remove();
+            cool.selectAll("circle").remove();
+            line = cool.append("line")
+            .attr("id", "line")
+            .transition()
+            .duration(1000)
+            .attr("x1", scalePoint(d['Year'])+45)
+            .attr("x2", scalePoint(d['Year'])+45)
+            .attr("y1", chartHeight_l-10)
+            .attr("y2", yScale(d['Depression']))
+            .attr("stroke", "black")
+            .attr("stroke-width", "1px")
+
+            cool.append("circle")
+            .transition()
+            .duration(1000)
+            .attr("cx", scalePoint(d['Year'])+45)
+            .attr("cy", yScale(d['Depression']))
+            .attr("r", "8")
+            .style("fill", d => colorScale(d.Temp))
+            .attr("stroke", "black")
+            .attr("stroke-width", "1")
+
+          }); 
+          let label=  chart_l.append("text");
+            lollipops.on("mouseover", mouseOver).on("mouseout", mouseOut);
+        
+            function mouseOver() {
+            d3.select(this).selectAll("circle").attr("stroke-width", 3); 
+            let d = d3.select(this).datum(); 
+            var xPos = scalePoint(d.Year)+ 15; 
+
+            temp = d['Temp']; 
+            //y2020 = percentScale(d['2020']);
+            label.text(temp +  '\u00B0F');
+            y = yScale(d['Depression']);
+
+            
+            label.attr("x",xPos+6).attr("y",y-10).attr("text-anchor","start");
+
+            label.attr("visibility","");
+            }
+            function mouseOut(){
+            d3.select(this).selectAll("circle").attr("stroke-width", 1);
+            label.attr("visibility","hidden");
+            
+        };
+
+
+        });
+        d3.select("#Bipolar").on("click", () => {
+          yScale.domain(d3.extent(d3.map(data, d=>d.Bipolar))); 
+          let yAxis = d3.axisLeft(yScale);
+          yAxisArea.transition().duration(1000).call(yAxis); 
+          lollipops.each( function(d) {
+            cool = d3.select(this);
+            cool.selectAll("line").remove();
+            cool.selectAll("circle").remove();
+            line = cool.append("line")
+            .attr("id", "line")
+            .transition()
+            .duration(1000)
+            .attr("x1", scalePoint(d['Year'])+45)
+            .attr("x2", scalePoint(d['Year'])+45)
+            .attr("y1", chartHeight_l-10)
+            .attr("y2", yScale(d['Bipolar']))
+            .attr("stroke", "black")
+            .attr("stroke-width", "1px")
+
+            cool.append("circle")
+            .transition()
+            .duration(1000)
+            .attr("cx", scalePoint(d['Year'])+45)
+            .attr("cy", yScale(d['Bipolar']))
+            .attr("r", "8")
+            .style("fill", d => colorScale(d.Temp))
+            .attr("stroke", "black")
+            .attr("stroke-width", "1")
+
+          }); 
+          let label=  chart_l.append("text");
+            lollipops.on("mouseover", mouseOver).on("mouseout", mouseOut);
+        
+            function mouseOver() {
+            d3.select(this).selectAll("circle").attr("stroke-width", 3); 
+            let d = d3.select(this).datum(); 
+            var xPos = scalePoint(d.Year)+ 15; 
+
+            temp = d['Temp']; 
+            //y2020 = percentScale(d['2020']);
+            label.text(temp +  '\u00B0F');
+            y = yScale(d['Bipolar']);
+
+            
+            label.attr("x",xPos+6).attr("y",y-10).attr("text-anchor","start");
+
+            label.attr("visibility","");
+            }
+            function mouseOut(){
+            d3.select(this).selectAll("circle").attr("stroke-width", 1);
+            label.attr("visibility","hidden");
+            
+        };
+
+
+        });
+
+    
+    })
+
+      // const requestData = async function() {
+      //   const data_l = await d3.csv("./data/Data-Climate.csv");
+      //   data_l.then((data)=>{
+      //     console.log(data); 
+      //   })
+      //   console.log(data_l); 
+      //   const scalePoint = d3.scalePoint().domain(d3.map(data_l, d => d['Year'])).range([10,chartWidth_l-10]).padding(0.2);
+      //   const yScale = d3.scaleLinear().range([10, chartHeight_l-10]);
+      //   let bottomAxis = d3.axisBottom(scalePoint); 
+      //   xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
+      //   //yScale.domain(d3.map(data_l, d=>d[svar])); 
+
+
+        
+
+       
+      
+      //    function change(svariable) {
+      //      yScale.domain(d3.map(data_l, d=>d[svariable])); 
+      //   //yAxis.transition().duration(1000).call(d3.axisLeft(yScale));
+      //     let yAxis = d3.axisLeft(yScale); //.tickFormat(formatPercent); 
+      //     yAxisArea.append("g").attr("class", "y axis").call(yAxis);//found on internet
+
+      //    }
+      //    d3.select("#Anxiety").on("click", () => {
+       
+      //     change("Anxiety"); });
+      //    d3.select("#Depression").on("click", () => {
+      //     change("Depression"); });
+      //     d3.select("#Bipolar").on("click", () => {
+      //     change("Bipolar")
+      
+      //     });
+
+
+      // }
+
+      
+      //requestData();
+      
     </script>
 
   </div>
