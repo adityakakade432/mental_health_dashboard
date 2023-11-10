@@ -3,6 +3,7 @@
 <head>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/topojson.v3.min.js"></script>
+  <script src="https://d3js.org/d3-contour.v3.min.js"></script>
 
   <style>
     body {
@@ -36,6 +37,13 @@
     }
 
     #lollipop {
+      outline: 5px solid rgb(180, 223, 230);
+      grid-column: 2;
+      margin: auto;
+      border-radius: 20px;
+    }
+
+    #scatter {
       outline: 5px solid rgb(180, 223, 230);
       grid-column: 2;
       margin: auto;
@@ -130,6 +138,14 @@
 
     .column {
       margin: auto;
+    }
+
+    .gridlines .domain {
+      display: none;
+    }
+
+    .gridlines line {
+      stroke: lightgray;
     }
   </style>
 </head>
@@ -984,6 +1000,209 @@
       
       //requestData();
       
+    </script>
+
+    <div class="column">
+      <h1 id="scatterTitle" class="chart-title">Hours of Sleep vs. Mental Health</h1>
+      <svg id="scatter" height="600" width="700"
+        style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:10px"></svg>
+      <div class="buttons">
+        <button id="sleep" class="data-sel">Hours of Sleep</button>
+        <button id="weight" class="data-sel">Body Weight (lbs)</button>
+        <button id="alcohol" class="data-sel">Alcohol Consumption</button>
+      </div>
+    </div>
+
+    <script>
+
+      const svg_s = d3.select("svg#scatter");
+      const width_s = svg_s.attr("width");
+      const height_s = svg_s.attr("height");
+      const margin_s = { top: 40, right: 40, bottom: 50, left: 50 };
+      const chartWidth_s = width_s - margin_s.left - margin_s.right;
+      const chartHeight_s = height_s - margin_s.top - margin_s.bottom;
+
+      let chart_s = svg_s.append("g").attr("id","points")
+                  .attr("transform",`translate(${margin.left},${margin.top})`);
+
+      chart_s.append("text")
+      .attr("class", "y label")
+      .attr("text-anchor", "end")
+      .attr("y", 6)
+      .attr("x", -chartHeight_s / 2 + 100)
+      .attr("dy", ".75em")
+      .attr("transform", "rotate(-90)")
+      .text("Poor Mental Health (Days per Month)");            
+      
+
+      async function reqeustScatterData() {
+        var mental_health_data = await d3.csv("./data/brfss2020subset.csv", d3.autotype)
+
+        mental_health_data.forEach((d) => {
+          d.value = +d.value;
+        });
+
+        mental_health_data = mental_health_data.filter((d) => d["mental_health"] <= 30);
+        mental_health_data = mental_health_data.filter((d) => d["sleephrs"] <= 24);
+
+        const mh_scale = d3.scaleLinear().domain([0, 40]).range([chartHeight_s, 0]);
+        let leftAxis_s = d3.axisLeft(mh_scale);
+
+        chart_s.append("g")
+        .attr("class", "y axis")
+        .attr("transform",`translate(${margin_s.left-10},${margin_s.top})`)
+        .call(leftAxis_s)
+
+        let yGridlines = d3.axisLeft(mh_scale)
+        .tickSize(-chartWidth_s - 10)
+        .tickFormat("")
+
+        chart_s.append("g")
+        .attr("class", "y gridlines")
+        .attr("transform", `translate(${margin_s.left - 10},${margin_s.top})`)
+        .call(yGridlines);
+
+        presentSleepData();
+
+        d3.select("#sleep").on("click", presentSleepData);
+
+          d3.select("#weight").on("click", presentWeightData)
+          
+          d3.select("#alcohol").on("click", presentAlcData)
+
+          function presentSleepData() {
+            chart_s.selectAll(".x.axis").remove();
+            chart_s.selectAll(".x.gridlines").remove();
+            chart_s.selectAll("path").remove();
+            d3.select('#scatterTitle')
+            .text('Hours of Sleep vs. Poor Mental Health')
+
+            const sleep_scale = d3.scaleLinear().domain([0, 12]).range([0, chartWidth_s]);
+            let sleep_axis = d3.axisBottom(sleep_scale);
+
+            chart_s.append("g")
+            .attr("class", "x axis")
+            .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
+            .transition()
+            .duration(500)
+            .call(sleep_axis);
+
+            let xGridlines = d3.axisBottom(sleep_scale)
+            .tickSize(-chartHeight_s - 10)
+            .tickFormat("")
+
+            chart_s.append("g")
+            .attr("class", "x gridlines")
+            .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
+            .call(xGridlines);
+
+            var sleepData = d3.contourDensity()
+            .x(function(d) { return sleep_scale(d.sleephrs); })
+            .y(function(d) { return mh_scale(d.mental_health); })
+            .size([width, height])
+            .bandwidth(20)    // smaller = more precision in lines = more lines
+            (mental_health_data)
+
+            chart_s.selectAll("path")
+            .data(sleepData)
+            .enter()
+            .append("path")
+            .attr("d", d3.geoPath())
+            .attr("fill", "rgba(102, 153, 255, 0.3)")
+            .attr("stroke", "blue")
+            .attr("stroke-linejoin", "round")
+          }
+
+          function presentWeightData() {
+            chart_s.selectAll(".x.axis").remove();
+            chart_s.selectAll(".x.gridlines").remove();
+            chart_s.selectAll("path").remove();
+            d3.select('#scatterTitle')
+            .text('Body Weight (lbs) vs. Poor Mental Health')
+
+            const weight_scale = d3.scaleLinear().domain([0, 300]).range([0, chartWidth_s]);
+            let weight_axis = d3.axisBottom(weight_scale);
+
+            chart_s.append("g")
+            .attr("class", "x axis")
+            .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
+            .transition()
+            .duration(500)
+            .call(weight_axis);
+
+            let xGridlines = d3.axisBottom(weight_scale)
+            .tickSize(-chartHeight_s - 10)
+            .tickFormat("")
+
+            chart_s.append("g")
+            .attr("class", "x gridlines")
+            .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
+            .call(xGridlines);
+
+            var weightData = d3.contourDensity()
+            .x(function(d) { return weight_scale(d.weight); })
+            .y(function(d) { return mh_scale(d.mental_health); })
+            .size([width, height])
+            .bandwidth(20)
+            (mental_health_data)
+
+            chart_s.selectAll("path")
+            .data(weightData)
+            .enter()
+            .append("path")
+            .attr("d", d3.geoPath())
+            .attr("fill", "rgba(153, 255, 153, 0.3)")
+            .attr("stroke", "green")
+            .attr("stroke-linejoin", "round")
+          }
+
+          function presentAlcData() {
+            mental_health_data_alc = mental_health_data.filter((d) => d["alcohol"] <= 76);
+            chart_s.selectAll(".x.axis").remove();
+            chart_s.selectAll(".x.gridlines").remove();
+            chart_s.selectAll("path").remove();
+            d3.select('#scatterTitle')
+            .text('Alcohol Consumption vs. Poor Mental Health')
+
+            const alc_scale = d3.scaleLinear().domain([-1, 6]).range([0, chartWidth_s]);
+            let alc_axis = d3.axisBottom(alc_scale);
+
+            chart_s.append("g")
+            .attr("class", "x axis")
+            .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
+            .transition()
+            .duration(500)
+            .call(alc_axis);
+
+            let xGridlines = d3.axisBottom(alc_scale)
+            .tickSize(-chartHeight_s - 10)
+            .tickFormat("")
+
+            chart_s.append("g")
+            .attr("class", "x gridlines")
+            .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
+            .call(xGridlines);
+
+            var alcData = d3.contourDensity()
+            .x(function(d) { return alc_scale(d.alcohol); })
+            .y(function(d) { return mh_scale(d.mental_health); })
+            .size([width, height])
+            .bandwidth(20)
+            (mental_health_data_alc)
+
+            chart_s.selectAll("path")
+            .data(alcData)
+            .enter()
+            .append("path")
+            .attr("d", d3.geoPath())
+            .attr("fill", "rgba(255, 255, 153, 0.3)")
+            .attr("stroke", "red")
+            .attr("stroke-linejoin", "round")
+          }
+      }
+      reqeustScatterData();
+      
+
     </script>
 
   </div>
