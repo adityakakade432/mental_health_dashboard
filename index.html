@@ -800,11 +800,6 @@
       </div>
     </div>
 
-    <!-- <svg height="700" width="600" id="lollipop"></svg>
-
-    <button id="Anxiety">Anxiety</button>
-    <button id ="Depression">Depression</button>
-    <button id = "Bipolar">Bipolar</button> -->
 
     <script>
       let margin_l = { "top": 10, "right": 10, "bottom": 65, "left": 65};
@@ -842,26 +837,14 @@
           yAxisArea.transition().duration(1000).call(yAxis);
           lollipops.each( function(d) {
             cool = d3.select(this);
-            cool.selectAll("line").remove();
             cool.selectAll("circle").remove();
-            line = cool.append("line")
-            .attr("id", "line")
-            .merge(cool)
-            .transition()
-            .duration(1000)
-            .attr("x1", scalePoint(d['Year'])+45)
-            .attr("x2", scalePoint(d['Year'])+45)
-            .attr("y1", chartHeight_l-10)
-            .attr("y2", yScale(d['Anxiety']))
-            .attr("stroke", "black")
-            .attr("stroke-width", "1px")
 
             cool.append("circle")
             .transition()
             .duration(1000)
             .attr("cx", scalePoint(d['Year'])+45)
             .attr("cy", yScale(d['Anxiety']))
-            .attr("r", "8")
+            .attr("r", "6")
             .style("fill", d => colorScale(d.Temp))
             .attr("stroke", "black")
             .attr("stroke-width", "1")
@@ -910,25 +893,14 @@
           //const lollipops = chart_l.selectAll(".lollipop").data(data).join("g").attr("class", "lollipop"); 
           lollipops.each( function(d) {
             cool = d3.select(this);
-            cool.selectAll("line").remove();
             cool.selectAll("circle").remove();
-            line = cool.append("line")
-            .attr("id", "line")
-            .transition()
-            .duration(1000)
-            .attr("x1", scalePoint(d['Year'])+45)
-            .attr("x2", scalePoint(d['Year'])+45)
-            .attr("y1", chartHeight_l-10)
-            .attr("y2", yScale(d['Depression']))
-            .attr("stroke", "black")
-            .attr("stroke-width", "1px")
 
             cool.append("circle")
             .transition()
             .duration(1000)
             .attr("cx", scalePoint(d['Year'])+45)
             .attr("cy", yScale(d['Depression']))
-            .attr("r", "8")
+            .attr("r", "6")
             .style("fill", d => colorScale(d.Temp))
             .attr("stroke", "black")
             .attr("stroke-width", "1")
@@ -973,25 +945,14 @@
           yAxisArea.transition().duration(1000).call(yAxis); 
           lollipops.each( function(d) {
             cool = d3.select(this);
-            cool.selectAll("line").remove();
             cool.selectAll("circle").remove();
-            line = cool.append("line")
-            .attr("id", "line")
-            .transition()
-            .duration(1000)
-            .attr("x1", scalePoint(d['Year'])+45)
-            .attr("x2", scalePoint(d['Year'])+45)
-            .attr("y1", chartHeight_l-10)
-            .attr("y2", yScale(d['Bipolar']))
-            .attr("stroke", "black")
-            .attr("stroke-width", "1px")
 
             cool.append("circle")
             .transition()
             .duration(1000)
             .attr("cx", scalePoint(d['Year'])+45)
             .attr("cy", yScale(d['Bipolar']))
-            .attr("r", "8")
+            .attr("r", "6")
             .style("fill", d => colorScale(d.Temp))
             .attr("stroke", "black")
             .attr("stroke-width", "1")
