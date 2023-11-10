@@ -3,7 +3,7 @@
 <head>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/topojson.v3.min.js"></script>
-<script src="https://d3js.org/d3-contour.v3.min.js"></script>
+  <script src="https://d3js.org/d3-contour.v3.min.js"></script>
 
   <style>
     body {
@@ -35,11 +35,6 @@
       border-radius: 20px;
     }
 
-    #graph2 {
-      outline: 5px solid rgb(180, 223, 230);
-      border-radius: 20px;
-    }
-
     #lollipop {
       outline: 5px solid rgb(223, 189, 253);
       margin: auto;
@@ -61,24 +56,24 @@
       stroke-width: 2px;
     }
 
-    .vis1{      
-      background-color: rgb(203, 247, 255);      
+    .vis1 {
+      background-color: rgb(203, 247, 255);
       padding-bottom: 60px;
-      padding-top: 40px;
+      padding-top: 60px;
       margin-bottom: 60px;
     }
 
-    .lollipop{      
-      background-color: rgb(237, 218, 254);      
+    .lollipop {
+      background-color: rgb(237, 218, 254);
       padding-bottom: 60px;
-      padding-top: 40px;   
-      margin-bottom: 60px;   
+      padding-top: 60px;
+      margin-bottom: 60px;
     }
 
-    .vis3{      
-      background-color: rgb(218, 254, 233);      
+    .vis3 {
+      background-color: rgb(218, 254, 233);
       padding-bottom: 60px;
-      padding-top: 40px;      
+      padding-top: 60px;
       margin-bottom: 60px;
     }
 
@@ -93,7 +88,7 @@
       margin-top: auto;
       margin-bottom: auto;
       margin-left: 2px;
-      margin-right: 2px;      
+      margin-right: 2px;
       border: none;
       color: white;
       padding: 15px 32px;
@@ -106,20 +101,31 @@
       border-radius: 20px;
     }
 
-    .vis1-button{
+    .vis1-button {
       background-color: rgb(180, 223, 230);
     }
 
-    .vis2-button{
+    .vis2-button {
       background-color: rgb(216, 180, 230);
     }
 
-    .vis3-button{
-      background-color: rgb(180, 230, 190);
+    .vis3-button {
+      background-color: rgb(193, 236, 202);
     }
 
-    .data-sel:hover {
+    .vis1-button:hover {
       background-color: rgb(43, 124, 217);
+      cursor: pointer;
+    }
+
+    .vis2-button:hover {
+      background-color: rgb(197, 94, 238);
+      cursor: pointer;
+    }
+
+    .vis3-button:hover {
+      background-color: rgb(90, 232, 119);
+      cursor: pointer;
     }
 
     .active-sel1 {
@@ -127,11 +133,11 @@
     }
 
     .active-sel2 {
-      background-color: rgb(212, 156, 234);
+      background-color: rgb(212, 143, 239);
     }
 
     .active-sel3 {
-      background-color: rgb(156, 232, 171);
+      background-color: rgb(141, 234, 160);
     }
 
     .dep-title {
@@ -197,10 +203,10 @@
 </head>
 
 <body>
-  <div class = "vis1">
+  <div class="vis1">
     <h1 style="margin: auto;">Correlation of Depression Rates to Various Factors </h1>
     <div class="wrapper">
-    
+
       <div class="column">
         <h2 id="depMap" class="dep-title">US Depression Rates</h2>
         <svg id="choropleth_dep" height="250" width="650"
@@ -208,7 +214,7 @@
         <h2 id="changeMap" class="change-title">US Average Temperatures</h2>
         <svg id="choropleth_change" height="250" width="650"
           style="background: rgb(255, 255, 255); margin-top:10px"></svg>
-            </div>
+      </div>
 
       <div class="column">
         <h2 id="chartTitle" class="chart-title">Temperature vs. Depression</h2>
@@ -223,990 +229,1007 @@
     </div>
   </div>
 
-    <script>
-      const svg_dep = d3.select("#choropleth_dep");
-      const svg_change = d3.select("#choropleth_change");
-
-      const width_dep = svg_dep.attr("width");
-      const height_dep = svg_dep.attr("height");
-      const width_change = svg_change.attr("width");
-      const height_change = svg_change.attr("height");
-
-      const margin = { top: 20, right: 20, bottom: 20, left: 20 };
-
-      const mapWidth_dep = width_dep - margin.left - margin.right;
-      const mapHeight_dep = height_dep - margin.top - margin.bottom;
-      const mapWidth_change = width_change - margin.left - margin.right;
-      const mapHeight_change = height_change - margin.top - margin.bottom;
-
-      const map_dep = svg_dep.append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-      const map_change = svg_change.append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-      const stateNum = { 1: "Alabama", 2: "Alaska", 4: "Arizona", 5: "Arkansas", 6: "California", 8: "Colorado", 9: "Connecticut", 10: "Delaware", 12: "Florida", 13: "Georgia", 15: "Hawaii", 16: "Idaho", 17: "Illinois", 18: "Indiana", 19: "Iowa", 20: "Kansas", 21: "Kentucky", 22: "Louisiana", 23: "Maine", 24: "Maryland", 25: "Massachusetts", 26: "Michigan", 27: "Minnesota", 28: "Mississippi", 29: "Missouri", 30: "Montana", 31: "Nebraska", 32: "Nevada", 33: "New Hampshire", 34: "New Jersey", 35: "New Mexico", 36: "New York", 37: "North Carolina", 38: "North Dakota", 39: "Ohio", 40: "Oklahoma", 41: "Oregon", 42: "Pennsylvania", 44: "Rhode Island", 45: "South Carolina", 46: "South Dakota", 47: "Tennessee", 48: "Texas", 49: "Utah", 50: "Vermont", 51: "Virginia", 53: "Washington", 54: "West Virginia", 55: "Wisconsin", 56: "Wyoming" };
-
-      const requestChoroplethData = async function (mode) {
-        const us = await d3.json("./data/us.json");
-        var states = topojson.feature(us, us.objects.states);
-        var statesMesh = topojson.mesh(us, us.objects.states);
-        var projection_dep = d3.geoAlbersUsa().fitSize([mapWidth_dep, mapHeight_dep], states);
-        var projection_change = d3.geoAlbersUsa().fitSize([mapWidth_change, mapHeight_change], states);
-
-        var path_dep = d3.geoPath().projection(projection_dep);
-        var path_change = d3.geoPath().projection(projection_dep);
-
-        //Depression Data Processing
-        var depression_data_map = {};
-        var depression_individual = [];
-        var depression_data_raw = await d3.csv("./data/depression-rates-by-state.csv",
-          function (d) {
-            depression_data_map[d.numberCode] = d.CrudeDepressionRate;
-            depression_individual.push(d.CrudeDepressionRate);
-          });
-        console.log(depression_data_map)
-
-        //Temperature Data Processing
-        var temp_data_map = {};
-        var temp_individual = [];
-        var temp_data_raw = await d3.csv("./data/average-temperatures-by-state.csv",
-          function (d) {
-            temp_data_map[d.numberCode] = d.averageTemperatureF;
-            temp_individual.push(d.averageTemperatureF);
-          });
-        console.log(temp_data_map)
-
-        //Sunlight Data Processing
-        var sunlight_data_map = {};
-        var sunlight_individual = [];
-        var sunlight_data_raw = await d3.csv("./data/sunniest-states.csv",
-          function (d) {
-            sunlight_data_map[d.numberCode] = d.averageAnnualSunlight;
-            sunlight_individual.push(d.averageAnnualSunlight);
-          });
-        console.log(sunlight_data_map)
-
-        //Income Data Processing
-        var income_data_map = {};
-        var income_individual = [];
-        var income_data_raw = await d3.csv("./data/median-household-income-by-state.csv",
-          function (d) {
-            income_data_map[d.numberCode] = d.medianHouseholdIncome2021;
-            income_individual.push(d.medianHouseholdIncome2021);
-          });
-        console.log(income_data_map)
-
-        var colorQuintiles = ["#6efad7", "#00d5e8", "#00abf7", "#0079ee", "#5536bb"];//['#bfe7ff', '#82c7f2', '#3ab4e1', '#6bc9aa', '#00c0a0'];
-        const temp_color_scale = d3.scaleQuantile().domain(temp_individual).range(colorQuintiles);
-        const depression_color_scale = d3.scaleQuantile().domain(depression_individual).range(colorQuintiles);
-        const sunlight_color_scale = d3.scaleQuantile().domain(sunlight_individual).range(colorQuintiles);
-        const income_color_scale = d3.scaleQuantile().domain(income_individual).range(colorQuintiles);
-
-        let statePaths_dep = map_dep.selectAll("path.state")
-          .data(states.features)
-          .join("path")
-          .attr("class", "state")
-          .attr("note", d => d.id)
-          .attr("d", path_dep)
-          .attr("fill", function (d) {
-            return depression_color_scale(depression_data_map[d.id]);
-          })
-
-        let statePaths_change = map_change.selectAll("path.state")
-          .data(states.features)
-          .join("path")
-          .attr("class", "state")
-          .attr("note", d => d.id)
-          .attr("d", path_change)
-          .attr("fill", function (d) {
-            if (mode == 1) {
-              return temp_color_scale(temp_data_map[d.id]);
-            }
-            else if (mode == 2) {
-              return sunlight_color_scale(sunlight_data_map[d.id]);
-            }
-            else if (mode == 3) {
-              return income_color_scale(income_data_map[d.id]);
-            }
-          })
-
-        map_dep.append("path")
-          .datum(statesMesh)
-          .attr("class", "outline")
-          .attr("d", path_dep);
-
-        map_change.append("path")
-          .datum(statesMesh)
-          .attr("class", "outline")
-          .attr("d", path_change);
-
-
-        let tooltipWidth = 100;
-        let tooltipHeight = 25;
-
-        const depressionMesh = map_dep.append("path")
-          .attr("class", "depression-mesh")
-          .style("stroke", "none")
-          .style("fill", "none");
-
-        let tooltip1 = map_dep.append("g")
-          .attr("class", "tooltip1")
-          .attr("visibility", "hidden");
-
-        tooltip1.append("rect")
-          .attr("fill", "black")
-          .attr("opacity", 0.5)
-          .attr("y", 0)
-          .attr("width", tooltipWidth)
-          .attr("height", tooltipHeight)
-          .attr("rx", 10);
-
-        tooltip1.append("text")
-          .attr("fill", "white")
-          .attr("text-anchor", "middle")
-          .attr("alignment-baseline", "hanging")
-          .attr("x", 0)
-          .attr("y", 8)
-          .attr("id", "depression-text");
-
-        const changeMesh = map_change.append("path")
-          .attr("class", "change-mesh")
-          .style("stroke", "none")
-          .style("fill", "none");
-
-        let tooltip2 = map_change.append("g")
-          .attr("class", "tooltip2")
-          .attr("visibility", "hidden");
-
-        tooltip2.append("rect")
-          .attr("fill", "black")
-          .attr("opacity", 0.5)
-          .attr("y", 0)
-          .attr("width", tooltipWidth)
-          .attr("height", tooltipHeight)
-          .attr("rx", 10);
-
-        tooltip2.append("text")
-          .attr("fill", "white")
-          .attr("text-anchor", "middle")
-          .attr("alignment-baseline", "hanging")
-          .attr("x", 0)
-          .attr("y", 8)
-          .attr("id", "change-text");
-
-
-        map_dep.selectAll("path.state")
-          .on("mouseover", function (event, d) {
-            const depression_val = depression_data_map[d.id]
-            console.log(depression_val)
-
-            tooltip1.style("visibility", "visible")
-
-            const [x, y] = d3.pointer(event);
-
-            var xPos = x;
-            var yPos = y - 25;
-
-            tooltip1.select("#depression-text")
-              .text(`${stateNum[d.id]}: ${depression_val}`);
-
-            const textElement = tooltip1.select("#depression-text");
-            const textBoundingBox = textElement.node().getBBox();
-            const tooltipWidth = textBoundingBox.width + 20;
-
-            if (xPos + tooltipWidth > width_dep) {
-              console.log(xPos);
-              xPos -= tooltipWidth;
-              console.log(xPos);
-            }
-
-            tooltip1.attr("transform", `translate(${xPos},${yPos})`);
-
-            tooltip1.select("rect")
-              .attr("width", tooltipWidth)
-              .attr("height", tooltipHeight);
-
-            textElement
-              .attr("x", tooltipWidth / 2)
-
-            depressionMesh.attr("d", path_dep(d))
-              .style("stroke", "darkblue")
-              .style("stroke-width", 3);
-
-          })
-          .on("mouseout", function () {
-            tooltip1.style("visibility", "hidden");
-            depressionMesh.style("stroke", "none").style("stroke-width", 0);
-
-          });
-
-
-        map_change.selectAll("path.state")
-          .on("mouseover", function (event, d) {
-            const temp_val = temp_data_map[d.id]
-            const sunlight_val = d3.format(",")(sunlight_data_map[d.id])
-            const income_val = d3.format(",")(income_data_map[d.id])
-
-            tooltip2.style("visibility", "visible")
-
-            const [x, y] = d3.pointer(event);
-
-            var xPos = x;
-            var yPos = y - 25;
-
-            if (mode == 1) {
-              tooltip2.select("#change-text")
-                .text(`${stateNum[d.id]}: ${temp_val} \u00B0F`);
-            }
-            else if (mode == 2) {
-              tooltip2.select("#change-text")
-                .text(`${stateNum[d.id]}: ${sunlight_val} Hrs`);
-            }
-            else if (mode == 3) {
-              tooltip2.select("#change-text")
-                .text(`${stateNum[d.id]}: $${income_val}`);
-            }
-
-            const textElement = tooltip2.select("#change-text");
-            const textBoundingBox = textElement.node().getBBox();
-            const tooltipWidth = textBoundingBox.width + 20; // Add some padding
-
-            if (xPos + tooltipWidth > width_dep) {
-              console.log(xPos);
-              xPos -= (tooltipWidth + 25);
-              console.log(xPos);
-            }
-
-            tooltip2.attr("transform", `translate(${xPos},${yPos})`);
-
-            tooltip2.select("rect")
-              .attr("width", tooltipWidth) // Set the calculated width
-              .attr("height", tooltipHeight);
-
-            textElement
-              .attr("x", tooltipWidth / 2) // Center the text in the tooltip
-
-
-            changeMesh.attr("d", path_change(d))
-              .style("stroke", "darkblue")
-              .style("stroke-width", 3);
-
-          })
-          .on("mouseout", function () {
-            tooltip2.style("visibility", "hidden");
-            changeMesh.style("stroke", "none").style("stroke-width", 0);
-
-          });
-
-
-      }
-
-      const svg2 = d3.select("svg#graph2");
-      const width2 = svg2.attr("width");
-      const height2 = svg2.attr("height");
-      const margin2 = { top: 40, right: 40, bottom: 50, left: 50 };
-      const chartWidth = width2 - margin2.left - margin2.right;
-      const chartHeight = height2 - margin2.top - margin2.bottom;
-
-      let annotations = svg2.append("g").attr("id", "annotations");
-      let chartArea = svg2.append("g").attr("id", "points")
-        .attr("transform", `translate(${margin2.left},${margin2.top})`);
-
-      function calculatePearsonCorrelation(xValues, yValues) {
-
-        // Calculate the means of x and y
-        const xMean = xValues.reduce((acc, x) => acc + x, 0) / xValues.length;
-        const yMean = yValues.reduce((acc, y) => acc + y, 0) / yValues.length;
-
-        // Calculate the sums of the products and squared deviations
-        let sumOfProducts = 0;
-        let sumOfSquaredDeviationsX = 0;
-        let sumOfSquaredDeviationsY = 0;
-
-        for (let i = 0; i < xValues.length; i++) {
-          const deviationX = xValues[i] - xMean;
-          const deviationY = yValues[i] - yMean;
-
-          sumOfProducts += deviationX * deviationY;
-          sumOfSquaredDeviationsX += deviationX ** 2;
-          sumOfSquaredDeviationsY += deviationY ** 2;
-        }
-
-        // Calculate the Pearson correlation coefficient
-        const r = sumOfProducts / (Math.sqrt(sumOfSquaredDeviationsX) * Math.sqrt(sumOfSquaredDeviationsY));
-        return r;
-      }
-
-
-      const requestChartData = async function (mode) {
-        
-        //Depression Data Processing
-        var depression_data_map = {};
-        var depression_individual = [];
-        var depression_data_raw = await d3.csv("./data/depression-rates-by-state.csv",
-          function (d) {
-            depression_data_map[d.numberCode] = d.CrudeDepressionRate;
-            depression_individual.push(d.CrudeDepressionRate);
-          });
-
-        //Temperature Data Processing
-        var temp_data_map = {};
-        var temp_individual = [];
-        var temp_data_raw = await d3.csv("./data/average-temperatures-by-state.csv",
-          function (d) {
-            temp_data_map[d.numberCode] = d.averageTemperatureF;
-            temp_individual.push(d.averageTemperatureF);
-          });
-
-        //Sunlight Data Processing
-        var sunlight_data_map = {};
-        var sunlight_individual = [];
-        var sunlight_data_raw = await d3.csv("./data/sunniest-states.csv",
-          function (d) {
-            sunlight_data_map[d.numberCode] = d.averageAnnualSunlight;
-            sunlight_individual.push(d.averageAnnualSunlight);
-          });
-        console.log(sunlight_data_map)
-
-        //Income Data Processing
-        var income_data_map = {};
-        var income_individual = [];
-        var income_data_raw = await d3.csv("./data/median-household-income-by-state.csv",
-          function (d) {
-            income_data_map[d.numberCode] = d.medianHouseholdIncome2021;
-            income_individual.push(d.medianHouseholdIncome2021);
-          });
-        console.log(income_data_map)
-
-        const xScale = d3.scaleLinear()
-          .domain([d3.min(depression_individual) - 1, d3.max(depression_individual) + 1])
-          .range([0, chartWidth]);
-
-        var selectedMap;
-        var selectedInd;
-
-        if (mode == 1) {
-          selectedMap = temp_data_map;
-          selectedInd = temp_individual;
-        }
-        else if (mode == 2) {
-          selectedMap = sunlight_data_map;
-          selectedInd = sunlight_individual
-        }
-        else if (mode == 3) {
-          selectedMap = income_data_map;
-          selectedInd = income_individual
-        }
-
-        const yScale = d3.scaleLinear()
-          .domain([d3.min(selectedInd), d3.max(selectedInd)])
-          .range([chartHeight, 0]);
-
-        chartArea.append("g")
-          .attr("class", "grid")
-          .call(d3.axisLeft(yScale).tickSize(-chartWidth).tickFormat(""))
-          .call(g => g.select(".domain").remove())
-          .call(g => g.selectAll(".tick:not(:first-of-type) line").attr("stroke-opacity", 0.5));
-
-        chartArea.append("g")
-          .attr("class", "grid")
-          .call(d3.axisBottom(xScale).tickSize(chartHeight).tickFormat(""))
-          .call(g => g.select(".domain").remove())
-          .call(g => g.selectAll(".tick:not(:first-of-type) line").attr("stroke-opacity", 0.5));
-
-        chartArea.append("g")
-          .attr("transform", `translate(0, ${chartHeight})`)
-          .call(d3.axisBottom(xScale));
-
-        chartArea.append("g")
-          .call(d3.axisLeft(yScale));
-
-        var xValues = [];
-        var yValues = [];
-
-        for (const key in depression_data_map) {
-          if (selectedMap[key]) {
-            const depressionValue = depression_data_map[key];
-            const tempValue = selectedMap[key];
-
-            const dataPoint = { x: depressionValue, y: tempValue };
-
-            xValues.push(parseFloat(selectedMap[key]))
-            yValues.push(parseFloat(depression_data_map[key]))
-
-            chartArea.append("circle")
-              .attr("cx", xScale(dataPoint.x))
-              .attr("cy", yScale(dataPoint.y))
-              .attr("r", 4)
-              .attr("fill", "#7cf7d0")
-              .attr("data-name", stateNum[key])
-
-            console.log(dataPoint)
-
+  <script>
+    const svg_dep = d3.select("#choropleth_dep");
+    const svg_change = d3.select("#choropleth_change");
+
+    const width_dep = svg_dep.attr("width");
+    const height_dep = svg_dep.attr("height");
+    const width_change = svg_change.attr("width");
+    const height_change = svg_change.attr("height");
+
+    const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+
+    const mapWidth_dep = width_dep - margin.left - margin.right;
+    const mapHeight_dep = height_dep - margin.top - margin.bottom;
+    const mapWidth_change = width_change - margin.left - margin.right;
+    const mapHeight_change = height_change - margin.top - margin.bottom;
+
+    const map_dep = svg_dep.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    const map_change = svg_change.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    const stateNum = { 1: "Alabama", 2: "Alaska", 4: "Arizona", 5: "Arkansas", 6: "California", 8: "Colorado", 9: "Connecticut", 10: "Delaware", 12: "Florida", 13: "Georgia", 15: "Hawaii", 16: "Idaho", 17: "Illinois", 18: "Indiana", 19: "Iowa", 20: "Kansas", 21: "Kentucky", 22: "Louisiana", 23: "Maine", 24: "Maryland", 25: "Massachusetts", 26: "Michigan", 27: "Minnesota", 28: "Mississippi", 29: "Missouri", 30: "Montana", 31: "Nebraska", 32: "Nevada", 33: "New Hampshire", 34: "New Jersey", 35: "New Mexico", 36: "New York", 37: "North Carolina", 38: "North Dakota", 39: "Ohio", 40: "Oklahoma", 41: "Oregon", 42: "Pennsylvania", 44: "Rhode Island", 45: "South Carolina", 46: "South Dakota", 47: "Tennessee", 48: "Texas", 49: "Utah", 50: "Vermont", 51: "Virginia", 53: "Washington", 54: "West Virginia", 55: "Wisconsin", 56: "Wyoming" };
+
+    const requestChoroplethData = async function (mode) {
+      const us = await d3.json("./data/us.json");
+      var states = topojson.feature(us, us.objects.states);
+      var statesMesh = topojson.mesh(us, us.objects.states);
+      var projection_dep = d3.geoAlbersUsa().fitSize([mapWidth_dep, mapHeight_dep], states);
+      var projection_change = d3.geoAlbersUsa().fitSize([mapWidth_change, mapHeight_change], states);
+
+      var path_dep = d3.geoPath().projection(projection_dep);
+      var path_change = d3.geoPath().projection(projection_dep);
+
+      //Depression Data Processing
+      var depression_data_map = {};
+      var depression_individual = [];
+      var depression_data_raw = await d3.csv("./data/depression-rates-by-state.csv",
+        function (d) {
+          depression_data_map[d.numberCode] = d.CrudeDepressionRate;
+          depression_individual.push(d.CrudeDepressionRate);
+        });
+      console.log(depression_data_map)
+
+      //Temperature Data Processing
+      var temp_data_map = {};
+      var temp_individual = [];
+      var temp_data_raw = await d3.csv("./data/average-temperatures-by-state.csv",
+        function (d) {
+          temp_data_map[d.numberCode] = d.averageTemperatureF;
+          temp_individual.push(d.averageTemperatureF);
+        });
+      console.log(temp_data_map)
+
+      //Sunlight Data Processing
+      var sunlight_data_map = {};
+      var sunlight_individual = [];
+      var sunlight_data_raw = await d3.csv("./data/sunniest-states.csv",
+        function (d) {
+          sunlight_data_map[d.numberCode] = d.averageAnnualSunlight;
+          sunlight_individual.push(d.averageAnnualSunlight);
+        });
+      console.log(sunlight_data_map)
+
+      //Income Data Processing
+      var income_data_map = {};
+      var income_individual = [];
+      var income_data_raw = await d3.csv("./data/median-household-income-by-state.csv",
+        function (d) {
+          income_data_map[d.numberCode] = d.medianHouseholdIncome2021;
+          income_individual.push(d.medianHouseholdIncome2021);
+        });
+      console.log(income_data_map)
+
+      var colorQuintiles = ["#6efad7", "#00d5e8", "#00abf7", "#0079ee", "#5536bb"];//['#bfe7ff', '#82c7f2', '#3ab4e1', '#6bc9aa', '#00c0a0'];
+      const temp_color_scale = d3.scaleQuantile().domain(temp_individual).range(colorQuintiles);
+      const depression_color_scale = d3.scaleQuantile().domain(depression_individual).range(colorQuintiles);
+      const sunlight_color_scale = d3.scaleQuantile().domain(sunlight_individual).range(colorQuintiles);
+      const income_color_scale = d3.scaleQuantile().domain(income_individual).range(colorQuintiles);
+
+      let statePaths_dep = map_dep.selectAll("path.state")
+        .data(states.features)
+        .join("path")
+        .attr("class", "state")
+        .attr("note", d => d.id)
+        .attr("d", path_dep)
+        .attr("fill", function (d) {
+          return depression_color_scale(depression_data_map[d.id]);
+        })
+
+      let statePaths_change = map_change.selectAll("path.state")
+        .data(states.features)
+        .join("path")
+        .attr("class", "state")
+        .attr("note", d => d.id)
+        .attr("d", path_change)
+        .attr("fill", function (d) {
+          if (mode == 1) {
+            return temp_color_scale(temp_data_map[d.id]);
+          }
+          else if (mode == 2) {
+            return sunlight_color_scale(sunlight_data_map[d.id]);
+          }
+          else if (mode == 3) {
+            return income_color_scale(income_data_map[d.id]);
+          }
+        })
+
+      map_dep.append("path")
+        .datum(statesMesh)
+        .attr("class", "outline")
+        .attr("d", path_dep);
+
+      map_change.append("path")
+        .datum(statesMesh)
+        .attr("class", "outline")
+        .attr("d", path_change);
+
+
+      let tooltipWidth = 100;
+      let tooltipHeight = 25;
+
+      const depressionMesh = map_dep.append("path")
+        .attr("class", "depression-mesh")
+        .style("stroke", "none")
+        .style("fill", "none");
+
+      let tooltip1 = map_dep.append("g")
+        .attr("class", "tooltip1")
+        .attr("visibility", "hidden");
+
+      tooltip1.append("rect")
+        .attr("fill", "black")
+        .attr("opacity", 0.5)
+        .attr("y", 0)
+        .attr("width", tooltipWidth)
+        .attr("height", tooltipHeight)
+        .attr("rx", 10);
+
+      tooltip1.append("text")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "hanging")
+        .attr("x", 0)
+        .attr("y", 8)
+        .attr("id", "depression-text");
+
+      const changeMesh = map_change.append("path")
+        .attr("class", "change-mesh")
+        .style("stroke", "none")
+        .style("fill", "none");
+
+      let tooltip2 = map_change.append("g")
+        .attr("class", "tooltip2")
+        .attr("visibility", "hidden");
+
+      tooltip2.append("rect")
+        .attr("fill", "black")
+        .attr("opacity", 0.5)
+        .attr("y", 0)
+        .attr("width", tooltipWidth)
+        .attr("height", tooltipHeight)
+        .attr("rx", 10);
+
+      tooltip2.append("text")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "hanging")
+        .attr("x", 0)
+        .attr("y", 8)
+        .attr("id", "change-text");
+
+
+      map_dep.selectAll("path.state")
+        .on("mouseover", function (event, d) {
+          const depression_val = depression_data_map[d.id]
+          console.log(depression_val)
+
+          tooltip1.style("visibility", "visible")
+
+          const [x, y] = d3.pointer(event);
+
+          var xPos = x;
+          var yPos = y - 25;
+
+          tooltip1.select("#depression-text")
+            .text(`${stateNum[d.id]}: ${depression_val}`);
+
+          const textElement = tooltip1.select("#depression-text");
+          const textBoundingBox = textElement.node().getBBox();
+          const tooltipWidth = textBoundingBox.width + 20;
+
+          if (xPos + tooltipWidth > width_dep) {
+            console.log(xPos);
+            xPos -= tooltipWidth;
+            console.log(xPos);
           }
 
+          tooltip1.attr("transform", `translate(${xPos},${yPos})`);
+
+          tooltip1.select("rect")
+            .attr("width", tooltipWidth)
+            .attr("height", tooltipHeight);
+
+          textElement
+            .attr("x", tooltipWidth / 2)
+
+          depressionMesh.attr("d", path_dep(d))
+            .style("stroke", "darkblue")
+            .style("stroke-width", 3);
+
+        })
+        .on("mouseout", function () {
+          tooltip1.style("visibility", "hidden");
+          depressionMesh.style("stroke", "none").style("stroke-width", 0);
+
+        });
+
+
+      map_change.selectAll("path.state")
+        .on("mouseover", function (event, d) {
+          const temp_val = temp_data_map[d.id]
+          const sunlight_val = d3.format(",")(sunlight_data_map[d.id])
+          const income_val = d3.format(",")(income_data_map[d.id])
+
+          tooltip2.style("visibility", "visible")
+
+          const [x, y] = d3.pointer(event);
+
+          var xPos = x;
+          var yPos = y - 25;
+
+          if (mode == 1) {
+            tooltip2.select("#change-text")
+              .text(`${stateNum[d.id]}: ${temp_val} \u00B0F`);
+          }
+          else if (mode == 2) {
+            tooltip2.select("#change-text")
+              .text(`${stateNum[d.id]}: ${sunlight_val} Hrs`);
+          }
+          else if (mode == 3) {
+            tooltip2.select("#change-text")
+              .text(`${stateNum[d.id]}: $${income_val}`);
+          }
+
+          const textElement = tooltip2.select("#change-text");
+          const textBoundingBox = textElement.node().getBBox();
+          const tooltipWidth = textBoundingBox.width + 20; // Add some padding
+
+          if (xPos + tooltipWidth > width_dep) {
+            console.log(xPos);
+            xPos -= (tooltipWidth + 25);
+            console.log(xPos);
+          }
+
+          tooltip2.attr("transform", `translate(${xPos},${yPos})`);
+
+          tooltip2.select("rect")
+            .attr("width", tooltipWidth) // Set the calculated width
+            .attr("height", tooltipHeight);
+
+          textElement
+            .attr("x", tooltipWidth / 2) // Center the text in the tooltip
+
+
+          changeMesh.attr("d", path_change(d))
+            .style("stroke", "darkblue")
+            .style("stroke-width", 3);
+
+        })
+        .on("mouseout", function () {
+          tooltip2.style("visibility", "hidden");
+          changeMesh.style("stroke", "none").style("stroke-width", 0);
+
+        });
+
+
+    }
+
+    const svg2 = d3.select("svg#graph2");
+    const width2 = svg2.attr("width");
+    const height2 = svg2.attr("height");
+    const margin2 = { top: 40, right: 40, bottom: 50, left: 50 };
+    const chartWidth = width2 - margin2.left - margin2.right;
+    const chartHeight = height2 - margin2.top - margin2.bottom;
+
+    let annotations = svg2.append("g").attr("id", "annotations");
+    let chartArea = svg2.append("g").attr("id", "points")
+      .attr("transform", `translate(${margin2.left},${margin2.top})`);
+
+    function calculatePearsonCorrelation(xValues, yValues) {
+
+      // Calculate the means of x and y
+      const xMean = xValues.reduce((acc, x) => acc + x, 0) / xValues.length;
+      const yMean = yValues.reduce((acc, y) => acc + y, 0) / yValues.length;
+
+      // Calculate the sums of the products and squared deviations
+      let sumOfProducts = 0;
+      let sumOfSquaredDeviationsX = 0;
+      let sumOfSquaredDeviationsY = 0;
+
+      for (let i = 0; i < xValues.length; i++) {
+        const deviationX = xValues[i] - xMean;
+        const deviationY = yValues[i] - yMean;
+
+        sumOfProducts += deviationX * deviationY;
+        sumOfSquaredDeviationsX += deviationX ** 2;
+        sumOfSquaredDeviationsY += deviationY ** 2;
+      }
+
+      // Calculate the Pearson correlation coefficient
+      const r = sumOfProducts / (Math.sqrt(sumOfSquaredDeviationsX) * Math.sqrt(sumOfSquaredDeviationsY));
+      return r;
+    }
+
+
+    const requestChartData = async function (mode) {
+
+      //Depression Data Processing
+      var depression_data_map = {};
+      var depression_individual = [];
+      var depression_data_raw = await d3.csv("./data/depression-rates-by-state.csv",
+        function (d) {
+          depression_data_map[d.numberCode] = d.CrudeDepressionRate;
+          depression_individual.push(d.CrudeDepressionRate);
+        });
+
+      //Temperature Data Processing
+      var temp_data_map = {};
+      var temp_individual = [];
+      var temp_data_raw = await d3.csv("./data/average-temperatures-by-state.csv",
+        function (d) {
+          temp_data_map[d.numberCode] = d.averageTemperatureF;
+          temp_individual.push(d.averageTemperatureF);
+        });
+
+      //Sunlight Data Processing
+      var sunlight_data_map = {};
+      var sunlight_individual = [];
+      var sunlight_data_raw = await d3.csv("./data/sunniest-states.csv",
+        function (d) {
+          sunlight_data_map[d.numberCode] = d.averageAnnualSunlight;
+          sunlight_individual.push(d.averageAnnualSunlight);
+        });
+      console.log(sunlight_data_map)
+
+      //Income Data Processing
+      var income_data_map = {};
+      var income_individual = [];
+      var income_data_raw = await d3.csv("./data/median-household-income-by-state.csv",
+        function (d) {
+          income_data_map[d.numberCode] = d.medianHouseholdIncome2021;
+          income_individual.push(d.medianHouseholdIncome2021);
+        });
+      console.log(income_data_map)
+
+      const xScale = d3.scaleLinear()
+        .domain([d3.min(depression_individual) - 1, d3.max(depression_individual) + 1])
+        .range([0, chartWidth]);
+
+      var selectedMap;
+      var selectedInd;
+
+      if (mode == 1) {
+        selectedMap = temp_data_map;
+        selectedInd = temp_individual;
+      }
+      else if (mode == 2) {
+        selectedMap = sunlight_data_map;
+        selectedInd = sunlight_individual
+      }
+      else if (mode == 3) {
+        selectedMap = income_data_map;
+        selectedInd = income_individual
+      }
+
+      const yScale = d3.scaleLinear()
+        .domain([d3.min(selectedInd), d3.max(selectedInd)])
+        .range([chartHeight, 0]);
+
+      chartArea.append("g")
+        .attr("class", "grid")
+        .call(d3.axisLeft(yScale).tickSize(-chartWidth).tickFormat(""))
+        .call(g => g.select(".domain").remove())
+        .call(g => g.selectAll(".tick:not(:first-of-type) line").attr("stroke-opacity", 0.5));
+
+      chartArea.append("g")
+        .attr("class", "grid")
+        .call(d3.axisBottom(xScale).tickSize(chartHeight).tickFormat(""))
+        .call(g => g.select(".domain").remove())
+        .call(g => g.selectAll(".tick:not(:first-of-type) line").attr("stroke-opacity", 0.5));
+
+      chartArea.append("g")
+        .attr("transform", `translate(0, ${chartHeight})`)
+        .call(d3.axisBottom(xScale));
+
+      chartArea.append("g")
+        .call(d3.axisLeft(yScale));
+
+      var xValues = [];
+      var yValues = [];
+
+      for (const key in depression_data_map) {
+        if (selectedMap[key]) {
+          const depressionValue = depression_data_map[key];
+          const tempValue = selectedMap[key];
+
+          const dataPoint = { x: depressionValue, y: tempValue };
+
+          xValues.push(parseFloat(selectedMap[key]))
+          yValues.push(parseFloat(depression_data_map[key]))
+
+          chartArea.append("circle")
+            .attr("cx", xScale(dataPoint.x))
+            .attr("cy", yScale(dataPoint.y))
+            .attr("r", 4)
+            .attr("fill", "#7cf7d0")
+            .attr("data-name", stateNum[key])
+
+          console.log(dataPoint)
+
         }
 
-        const correlationCoefficient = calculatePearsonCorrelation(xValues, yValues);
-
-        const legend = chartArea.append("g")
-          .attr("class", "legend")
-
-        legend.append("rect")
-          .attr("x", 20)
-          .attr("y", 325)
-          .attr("width", 220)
-          .attr("height", 34)
-          .attr("fill", "black")
-          .attr("opacity", "0.5")
-          .attr("rx", "10");
-
-        legend.append("text")
-          .attr("fill", "white")
-          .attr("x", 20 + 110)
-          .attr("y", 325 + 17)
-          .attr("text-anchor", "middle") // Center the text horizontally
-          .attr("alignment-baseline", "middle")
-          .text("Pearson Correlation: " + d3.format(".3f")(correlationCoefficient));
-
-        let tooltip3Width = 100;
-        let tooltip3Height = 25;
-
-        let tooltip3 = chartArea.append("g")
-          .attr("class", "tooltip3")
-          .attr("visibility", "hidden");
-
-        tooltip3.append("rect")
-          .attr("fill", "black")
-          .attr("opacity", 0.5)
-          .attr("y", 0)
-          .attr("width", tooltip3Width)
-          .attr("height", tooltip3Height)
-          .attr("rx", 10);
-
-        tooltip3.append("text")
-          .attr("fill", "white")
-          .attr("text-anchor", "middle")
-          .attr("alignment-baseline", "hanging")
-          .attr("x", 0)
-          .attr("y", 8)
-          .attr("id", "scatter-label");
-
-        chartArea.selectAll("circle")
-          .on("mouseover", function (event, d) {
-            const point = d3.select(this);
-            point.raise();
-            point.attr("r", 8)
-              .attr("fill", "#4d75f0");
-
-            tooltip3.style("visibility", "visible")
-
-            var xPos = parseFloat(point.attr("cx")) + 5;
-            var yPos = parseFloat(point.attr("cy")) - 30;
-
-            tooltip3.select("#scatter-label")
-              .text(`${point.attr("data-name")}`);
-
-            const textElement = tooltip3.select("#scatter-label");
-            const textBoundingBox = textElement.node().getBBox();
-            const tooltip3Width = textBoundingBox.width + 20;
-
-            if (xPos + tooltip3Width > width2 - 50) {
-              console.log(xPos);
-              xPos -= (tooltip3Width + 10);
-              console.log(xPos);
-            }
-
-            tooltip3.attr("transform", `translate(${xPos},${yPos})`);
-
-            tooltip3.select("rect")
-              .attr("width", tooltip3Width)
-              .attr("height", tooltip3Height);
-
-            textElement
-              .attr("x", tooltip3Width / 2)
-
-          })
-          .on("mouseout", function () {
-            tooltip3.style("visibility", "hidden");
-            const point = d3.select(this);
-            point.attr("r", 4)
-              .attr("fill", "#7cf7d0");
-          });
-
       }
 
-      function clearChart() {
-        chartArea.selectAll("circle").remove();
-        chartArea.selectAll(".grid").remove();
-        chartArea.selectAll("g").remove();
-      }
+      const correlationCoefficient = calculatePearsonCorrelation(xValues, yValues);
 
-      d3.select("#temperatures").on("click", function (event) {
-        clearChart();
-        requestChartData(1)
-        requestChoroplethData(1)
-        d3.select('#changeMap')
-          .text('US Average Temperatures')
-        d3.select('#chartTitle')
-          .text('Temperature vs. Depression')
-        d3.selectAll('.data-sel').classed('active-sel1', false);
-        d3.select(this).classed('active-sel1', true);
+      const legend = chartArea.append("g")
+        .attr("class", "legend")
 
-      });
+      legend.append("rect")
+        .attr("x", 20)
+        .attr("y", 325)
+        .attr("width", 220)
+        .attr("height", 34)
+        .attr("fill", "black")
+        .attr("opacity", "0.5")
+        .attr("rx", "10");
 
-      d3.select("#sunlight").on("click", function (event) {
-        clearChart();
-        requestChartData(2)
-        d3.selectAll('.data-sel').classed('active-sel1', false);
-        d3.select(this).classed('active-sel1', true);
-        requestChoroplethData(2)
-        d3.select('#changeMap')
-          .text('US Average Sunlight')
-        d3.select('#chartTitle')
-          .text('Sunlight vs. Depression')
+      legend.append("text")
+        .attr("fill", "white")
+        .attr("x", 20 + 110)
+        .attr("y", 325 + 17)
+        .attr("text-anchor", "middle") // Center the text horizontally
+        .attr("alignment-baseline", "middle")
+        .text("Pearson Correlation: " + d3.format(".3f")(correlationCoefficient));
 
-      });
+      let tooltip3Width = 100;
+      let tooltip3Height = 25;
 
-      d3.select("#income").on("click", function (event) {
-        clearChart();
-        requestChartData(3)
-        d3.selectAll('.data-sel').classed('active-sel1', false);
-        d3.select(this).classed('active-sel1', true);
-        requestChoroplethData(3)
-        d3.select('#changeMap')
-          .text('US Median Income')
-        d3.select('#chartTitle')
-          .text('Income vs. Depression')
+      let tooltip3 = chartArea.append("g")
+        .attr("class", "tooltip3")
+        .attr("visibility", "hidden");
 
-      });
+      tooltip3.append("rect")
+        .attr("fill", "black")
+        .attr("opacity", 0.5)
+        .attr("y", 0)
+        .attr("width", tooltip3Width)
+        .attr("height", tooltip3Height)
+        .attr("rx", 10);
 
-      d3.select("#temperatures").classed('active-sel1', true);
-      d3.select("#temperatures").classed('active-sel1', true);
+      tooltip3.append("text")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "hanging")
+        .attr("x", 0)
+        .attr("y", 8)
+        .attr("id", "scatter-label");
+
+      chartArea.selectAll("circle")
+        .on("mouseover", function (event, d) {
+          const point = d3.select(this);
+          point.raise();
+          point.attr("r", 8)
+            .attr("fill", "#4d75f0");
+
+          tooltip3.style("visibility", "visible")
+
+          var xPos = parseFloat(point.attr("cx")) + 5;
+          var yPos = parseFloat(point.attr("cy")) - 30;
+
+          tooltip3.select("#scatter-label")
+            .text(`${point.attr("data-name")}`);
+
+          const textElement = tooltip3.select("#scatter-label");
+          const textBoundingBox = textElement.node().getBBox();
+          const tooltip3Width = textBoundingBox.width + 20;
+
+          if (xPos + tooltip3Width > width2 - 50) {
+            console.log(xPos);
+            xPos -= (tooltip3Width + 10);
+            console.log(xPos);
+          }
+
+          tooltip3.attr("transform", `translate(${xPos},${yPos})`);
+
+          tooltip3.select("rect")
+            .attr("width", tooltip3Width)
+            .attr("height", tooltip3Height);
+
+          textElement
+            .attr("x", tooltip3Width / 2)
+
+        })
+        .on("mouseout", function () {
+          tooltip3.style("visibility", "hidden");
+          const point = d3.select(this);
+          point.attr("r", 4)
+            .attr("fill", "#7cf7d0");
+        });
+
+    }
+
+    function clearChart() {
+      chartArea.selectAll("circle").remove();
+      chartArea.selectAll(".grid").remove();
+      chartArea.selectAll("g").remove();
+    }
+
+    d3.select("#temperatures").on("click", function (event) {
       clearChart();
-      requestChoroplethData(1);
-      requestChartData(1);
+      requestChartData(1)
+      requestChoroplethData(1)
+      d3.select('#changeMap')
+        .text('US Average Temperatures')
+      d3.select('#chartTitle')
+        .text('Temperature vs. Depression')
+      d3.selectAll('.data-sel').classed('active-sel1', false);
+      d3.select(this).classed('active-sel1', true);
 
-    </script>
-   
-   <div class="lollipop">
-      <h1 id="Title" class="chart-title">Mental Healths Stats vs Yearly Temperature</h1>
-      <svg id="lollipop" height="600" width="700"
-        style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:20px"></svg>
-      <div class="buttons">
-        <button id="Anxiety" class="data-sel vis2-button">Anxiety</button>
-        <button id="Depression" class="data-sel vis2-button">Depression</button>
-        <button id="Bipolar" class="data-sel vis2-button">Bipolar</button>
-      </div>
+    });
+
+    d3.select("#sunlight").on("click", function (event) {
+      clearChart();
+      requestChartData(2)
+      d3.selectAll('.data-sel').classed('active-sel1', false);
+      d3.select(this).classed('active-sel1', true);
+      requestChoroplethData(2)
+      d3.select('#changeMap')
+        .text('US Average Sunlight')
+      d3.select('#chartTitle')
+        .text('Sunlight vs. Depression')
+
+    });
+
+    d3.select("#income").on("click", function (event) {
+      clearChart();
+      requestChartData(3)
+      d3.selectAll('.data-sel').classed('active-sel1', false);
+      d3.select(this).classed('active-sel1', true);
+      requestChoroplethData(3)
+      d3.select('#changeMap')
+        .text('US Median Income')
+      d3.select('#chartTitle')
+        .text('Income vs. Depression')
+
+    });
+
+    d3.select("#temperatures").classed('active-sel1', true);
+    clearChart();
+    requestChoroplethData(1);
+    requestChartData(1);
+
+  </script>
+
+  <div class="lollipop">
+    <h1 id="Title" class="chart-title">Mental Health Stats vs Yearly Temperature</h1>
+    <svg id="lollipop" height="500" width="700"
+      style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:20px"></svg>
+    <div class="buttons">
+      <button id="Anxiety" class="data-sel vis2-button">Anxiety</button>
+      <button id="Depression" class="data-sel vis2-button">Depression</button>
+      <button id="Bipolar" class="data-sel vis2-button">Bipolar</button>
     </div>
+  </div>
 
 
-    <script>
-      let margin_l = { "top": 10, "right": 10, "bottom": 65, "left": 65};
-      let svg_l  = d3.select('svg#lollipop');
-      let width = svg_l.attr("width");
-      let height = svg_l.attr("height");
-      const chartWidth_l = width - margin_l.left - margin_l.right; 
-      const chartHeight_l = height - margin_l.top - margin_l.bottom;
-      const yAxisArea = svg_l.append("g").attr("transform",`translate(${margin_l.left-1.5},${margin_l.top})`);
-      const xAxisArea = svg_l.append("g").attr("transform",`translate(${margin_l.left},${chartHeight_l+10+margin_l.top})`);
-      let chart_l = svg_l.append("g").attr("id","points")
-                  .attr("transform",`translate(${margin.left},${margin.top})`);
+  <script>
+    let margin_l = { "top": 10, "right": 10, "bottom": 65, "left": 65 };
+    let svg_l = d3.select('svg#lollipop');
+    let width = svg_l.attr("width");
+    let height = svg_l.attr("height");
+    const chartWidth_l = width - margin_l.left - margin_l.right;
+    const chartHeight_l = height - margin_l.top - margin_l.bottom;
+    const yAxisArea = svg_l.append("g").attr("transform", `translate(${margin_l.left - 1.5},${margin_l.top})`);
+    const xAxisArea = svg_l.append("g").attr("transform", `translate(${margin_l.left},${chartHeight_l + 10 + margin_l.top})`);
+    let chart_l = svg_l.append("g").attr("id", "points")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+
+    d3.csv("./data/Data-Climate.csv", d3.autotype).then(data => {
+      console.log(data);
+      const scalePoint = d3.scalePoint().domain(d3.map(data, d => d['Year'])).range([10, chartWidth_l - 10]).padding(0.2);
+      const yScale = d3.scaleLinear().range([chartHeight_l - 10, 10]);
+      let bottomAxis = d3.axisBottom(scalePoint);
+      xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
+      const colorScale = d3.scaleOrdinal(d3.schemePuBuGn[9]).domain(data.map(d => d.Temp));
+      const lollipops = chart_l.selectAll(".lollipop").data(data).join("g").attr("class", "lollipop");
 
       
-      d3.csv("./data/Data-Climate.csv", d3.autotype).then( data => {
-        console.log(data); 
-        const scalePoint = d3.scalePoint().domain(d3.map(data, d => d['Year'])).range([10,chartWidth_l-10]).padding(0.2);
-        const yScale = d3.scaleLinear().range([chartHeight_l-10,10]);
-        let bottomAxis = d3.axisBottom(scalePoint); 
+
+      async function showAnxiety() {
+        svg_l.selectAll("text").remove();
+
+
+
         xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
-        const colorScale = d3.scaleOrdinal(d3.schemePuBuGn[9]).domain(data.map(d => d.Temp) );
-        const lollipops = chart_l.selectAll(".lollipop").data(data).join("g").attr("class", "lollipop"); 
-        d3.select("#Anxiety").on("click", function(event) {
-          svg_l.selectAll("text").remove();
-
-        d3.selectAll('.data-sel').classed('active-sel2', false);
-        d3.select(this).classed('active-sel2', true);
-
-          xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
-          svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 3).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
+        svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 3).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
           .text(" Anxiety Disorders (Share of Population)");
-          svg_l.append("text").attr("text-anchor", "end").attr("x", chartWidth_l/2 + 60).attr("y", height-20).text("Year");
-          yScale.domain(d3.extent(d3.map(data, d=>d.Anxiety))); 
-          let yAxis = d3.axisLeft(yScale); 
-          yAxisArea.transition().duration(1000).call(yAxis);
-          lollipops.each( function(d) {
-            cool = d3.select(this);
-            cool.selectAll("circle").remove();
+        svg_l.append("text").attr("text-anchor", "end").attr("x", chartWidth_l / 2 + 60).attr("y", height - 20).text("Year");
+        yScale.domain(d3.extent(d3.map(data, d => d.Anxiety)));
+        let yAxis = d3.axisLeft(yScale);
+        yAxisArea.transition().duration(1000).call(yAxis);
+        lollipops.each(function (d) {
+          cool = d3.select(this);
+          cool.selectAll("circle").remove();
 
-            cool.append("circle")
+          cool.append("circle")
             .transition()
             .duration(1000)
-            .attr("cx", scalePoint(d['Year'])+45)
+            .attr("cx", scalePoint(d['Year']) + 45)
             .attr("cy", yScale(d['Anxiety']))
             .attr("r", "6")
             .style("fill", d => colorScale(d.Temp))
             .attr("stroke", "black")
             .attr("stroke-width", "1")
 
-       
 
-          }); 
-          let label=  chart_l.append("text");
-            lollipops.on("mouseover", mouseOver).on("mouseout", mouseOut);
-        
-            function mouseOver() {
-            d3.select(this).selectAll("circle").attr("stroke-width", 3); 
-            let d = d3.select(this).datum(); 
-            var xPos = scalePoint(d.Year)+ 15; 
-
-            temp = d['Temp']; 
-            //y2020 = percentScale(d['2020']);
-            label.text(temp +  '\u00B0F');
-            y = yScale(d['Anxiety']);
-
-            
-            label.attr("x",xPos+6).attr("y",y-10).attr("text-anchor","start");
-
-            label.attr("visibility","");
-            }
-            function mouseOut(){
-            d3.select(this).selectAll("circle").attr("stroke-width", 1);
-            label.attr("visibility","hidden");
-            
-        };
-
-          //yAxisArea.append("g").attr("class", "y axis").call(yAxis);//found on internet
 
         });
-        d3.select("#Depression").on("click", function(event) {
-          svg_l.selectAll('text').remove();
-          d3.selectAll('.data-sel').classed('active-sel2', false);
-          d3.select(this).classed('active-sel2', true);
-          xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
-          svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 3).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
-          .text(" Depressive Disorders (Share of Population)");
-          svg_l.append("text").attr("text-anchor", "end").attr("x", chartWidth_l/2 + 60).attr("y", height-20).text("Year");
-          yScale.domain(d3.extent(d3.map(data, d=>d.Depression))); 
-          let yAxis = d3.axisLeft(yScale);
-          yAxisArea.transition().duration(1000).call(yAxis); 
-          //const lollipops = chart_l.selectAll(".lollipop").data(data).join("g").attr("class", "lollipop"); 
-          lollipops.each( function(d) {
-            cool = d3.select(this);
-            cool.selectAll("circle").remove();
+        let label = chart_l.append("text");
+        lollipops.on("mouseover", mouseOver).on("mouseout", mouseOut);
 
-            cool.append("circle")
+        function mouseOver() {
+          d3.select(this).selectAll("circle").attr("stroke-width", 3);
+          let d = d3.select(this).datum();
+          var xPos = scalePoint(d.Year) + 15;
+
+          temp = d['Temp'];
+          //y2020 = percentScale(d['2020']);
+          label.text(temp + '\u00B0F');
+          y = yScale(d['Anxiety']);
+
+
+          label.attr("x", xPos + 6).attr("y", y - 10).attr("text-anchor", "start");
+
+          label.attr("visibility", "");
+        }
+        function mouseOut() {
+          d3.select(this).selectAll("circle").attr("stroke-width", 1);
+          label.attr("visibility", "hidden");
+
+        };
+
+      }
+
+      async function showDepression() {
+        svg_l.selectAll('text').remove();
+        xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
+        svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 3).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
+          .text(" Depressive Disorders (Share of Population)");
+        svg_l.append("text").attr("text-anchor", "end").attr("x", chartWidth_l / 2 + 60).attr("y", height - 20).text("Year");
+        yScale.domain(d3.extent(d3.map(data, d => d.Depression)));
+        let yAxis = d3.axisLeft(yScale);
+        yAxisArea.transition().duration(1000).call(yAxis);
+        //const lollipops = chart_l.selectAll(".lollipop").data(data).join("g").attr("class", "lollipop"); 
+        lollipops.each(function (d) {
+          cool = d3.select(this);
+          cool.selectAll("circle").remove();
+
+          cool.append("circle")
             .transition()
             .duration(1000)
-            .attr("cx", scalePoint(d['Year'])+45)
+            .attr("cx", scalePoint(d['Year']) + 45)
             .attr("cy", yScale(d['Depression']))
             .attr("r", "6")
             .style("fill", d => colorScale(d.Temp))
             .attr("stroke", "black")
             .attr("stroke-width", "1")
 
-          }); 
-          let label=  chart_l.append("text");
-            lollipops.on("mouseover", mouseOver).on("mouseout", mouseOut);
-        
-            function mouseOver() {
-            d3.select(this).selectAll("circle").attr("stroke-width", 3); 
-            let d = d3.select(this).datum(); 
-            var xPos = scalePoint(d.Year)+ 15; 
+        });
+        let label = chart_l.append("text");
+        lollipops.on("mouseover", mouseOver).on("mouseout", mouseOut);
 
-            temp = d['Temp']; 
-            //y2020 = percentScale(d['2020']);
-            label.text(temp +  '\u00B0F');
-            y = yScale(d['Depression']);
+        function mouseOver() {
+          d3.select(this).selectAll("circle").attr("stroke-width", 3);
+          let d = d3.select(this).datum();
+          var xPos = scalePoint(d.Year) + 15;
 
-            
-            label.attr("x",xPos+6).attr("y",y-10).attr("text-anchor","start");
+          temp = d['Temp'];
+          //y2020 = percentScale(d['2020']);
+          label.text(temp + '\u00B0F');
+          y = yScale(d['Depression']);
 
-            label.attr("visibility","");
-            }
-            function mouseOut(){
-            d3.select(this).selectAll("circle").attr("stroke-width", 1);
-            label.attr("visibility","hidden");
-            
+
+          label.attr("x", xPos + 6).attr("y", y - 10).attr("text-anchor", "start");
+
+          label.attr("visibility", "");
+        }
+        function mouseOut() {
+          d3.select(this).selectAll("circle").attr("stroke-width", 1);
+          label.attr("visibility", "hidden");
+
         };
 
 
-        });
-        d3.select("#Bipolar").on("click", function(event) {
-          svg_l.selectAll('text').remove();
-          d3.selectAll('.data-sel').classed('active-sel2', false);
-          d3.select(this).classed('active-sel2', true);
-          xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
-          svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 1.5).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
-          .text(" Bipolar Disorders (Share of Population)");
-          svg_l.append("text").attr("text-anchor", "end").attr("x", chartWidth_l/2 + 60).attr("y", height-20).text("Year");
-          yScale.domain(d3.extent(d3.map(data, d=>d.Bipolar))); 
-          let yAxis = d3.axisLeft(yScale);
-          yAxisArea.transition().duration(1000).call(yAxis); 
-          lollipops.each( function(d) {
-            cool = d3.select(this);
-            cool.selectAll("circle").remove();
+      }
 
-            cool.append("circle")
+      async function showBipolar() {
+        svg_l.selectAll('text').remove();
+        xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
+        svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 1.5).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
+          .text(" Bipolar Disorders (Share of Population)");
+        svg_l.append("text").attr("text-anchor", "end").attr("x", chartWidth_l / 2 + 60).attr("y", height - 20).text("Year");
+        yScale.domain(d3.extent(d3.map(data, d => d.Bipolar)));
+        let yAxis = d3.axisLeft(yScale);
+        yAxisArea.transition().duration(1000).call(yAxis);
+        lollipops.each(function (d) {
+          cool = d3.select(this);
+          cool.selectAll("circle").remove();
+
+          cool.append("circle")
             .transition()
             .duration(1000)
-            .attr("cx", scalePoint(d['Year'])+45)
+            .attr("cx", scalePoint(d['Year']) + 45)
             .attr("cy", yScale(d['Bipolar']))
             .attr("r", "6")
             .style("fill", d => colorScale(d.Temp))
             .attr("stroke", "black")
             .attr("stroke-width", "1")
 
-          }); 
-          let label=  chart_l.append("text");
-            lollipops.on("mouseover", mouseOver).on("mouseout", mouseOut);
-        
-            function mouseOver() {
-            d3.select(this).selectAll("circle").attr("stroke-width", 3); 
-            let d = d3.select(this).datum(); 
-            var xPos = scalePoint(d.Year)+ 15; 
+        });
+        let label = chart_l.append("text");
+        lollipops.on("mouseover", mouseOver).on("mouseout", mouseOut);
 
-            temp = d['Temp']; 
-            //y2020 = percentScale(d['2020']);
-            label.text(temp +  '\u00B0F');
-            y = yScale(d['Bipolar']);
+        function mouseOver() {
+          d3.select(this).selectAll("circle").attr("stroke-width", 3);
+          let d = d3.select(this).datum();
+          var xPos = scalePoint(d.Year) + 15;
 
-            
-            label.attr("x",xPos+6).attr("y",y-10).attr("text-anchor","start");
+          temp = d['Temp'];
+          label.text(temp + '\u00B0F');
+          y = yScale(d['Bipolar']);
 
-            label.attr("visibility","");
-            }
-            function mouseOut(){
-            d3.select(this).selectAll("circle").attr("stroke-width", 1);
-            label.attr("visibility","hidden");
-            
+
+          label.attr("x", xPos + 6).attr("y", y - 10).attr("text-anchor", "start");
+
+          label.attr("visibility", "");
+        }
+        function mouseOut() {
+          d3.select(this).selectAll("circle").attr("stroke-width", 1);
+          label.attr("visibility", "hidden");
+
         };
 
 
-        });
+      }
 
-    
+      d3.select("#Anxiety").on("click", function (event) {
+        showAnxiety();
+        d3.selectAll('.data-sel').classed('active-sel2', false);
+        d3.select(this).classed('active-sel2', true);
+      });
+
+      d3.select("#Depression").on("click", function (event) {
+        showDepression();
+        d3.selectAll('.data-sel').classed('active-sel2', false);
+        d3.select(this).classed('active-sel2', true);
+      });
+
+      d3.select("#Bipolar").on("click", function (event) {
+        showBipolar();
+        d3.selectAll('.data-sel').classed('active-sel2', false);
+        d3.select(this).classed('active-sel2', true);
+      });
+
+      showAnxiety();
+      d3.select("#Anxiety").classed('active-sel2', true);
+
     })
 
-      
-    </script>
 
-<div class="vis3">
-      <h1 id="scatterTitle" class="chart-title">Hours of Sleep vs. Mental Health</h1>
-      <svg id="scatter" height="600" width="700"
-        style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:10px"></svg>
-      <div class="buttons">
-        <button id="sleep" class="data-sel vis3-button">Hours of Sleep</button>
-        <button id="weight" class="data-sel vis3-button">Body Weight (lbs)</button>
-        <button id="alcohol" class="data-sel vis3-button">Alcohol Consumption</button>
-      </div>
+  </script>
+
+  <div class="vis3">
+    <h1 id="scatterTitle" class="chart-title">Hours of Sleep vs. Mental Health</h1>
+    <svg id="scatter" height="500" width="700"
+      style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:10px"></svg>
+    <div class="buttons">
+      <button id="sleep" class="data-sel vis3-button">Hours of Sleep</button>
+      <button id="weight" class="data-sel vis3-button">Body Weight (lbs)</button>
+      <button id="alcohol" class="data-sel vis3-button">Alcohol Consumption</button>
+    </div>
   </div>
 
-<script>
+  <script>
 
-      const svg_s = d3.select("svg#scatter");
-      const width_s = svg_s.attr("width");
-      const height_s = svg_s.attr("height");
-      const margin_s = { top: 40, right: 40, bottom: 50, left: 50 };
-      const chartWidth_s = width_s - margin_s.left - margin_s.right;
-      const chartHeight_s = height_s - margin_s.top - margin_s.bottom;
+    const svg_s = d3.select("svg#scatter");
+    const width_s = svg_s.attr("width");
+    const height_s = svg_s.attr("height");
+    const margin_s = { top: 40, right: 40, bottom: 50, left: 50 };
+    const chartWidth_s = width_s - margin_s.left - margin_s.right;
+    const chartHeight_s = height_s - margin_s.top - margin_s.bottom;
 
-      let chart_s = svg_s.append("g").attr("id","points")
-                  .attr("transform",`translate(${margin.left},${margin.top})`);
+    let chart_s = svg_s.append("g").attr("id", "points")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
 
-      chart_s.append("text")
+    chart_s.append("text")
       .attr("class", "y label")
       .attr("text-anchor", "end")
       .attr("y", 6)
       .attr("x", -chartHeight_s / 2 + 100)
       .attr("dy", ".75em")
       .attr("transform", "rotate(-90)")
-      .text("Poor Mental Health (Days per Month)");            
-      
+      .text("Poor Mental Health (Days per Month)");
 
-      async function reqeustScatterData() {
-        var mental_health_data = await d3.csv("./data/brfss2020subset.csv", d3.autotype)
 
-        mental_health_data.forEach((d) => {
-          d.value = +d.value;
-        });
+    async function reqeustScatterData() {
+      var mental_health_data = await d3.csv("./data/brfss2020subset.csv", d3.autotype)
 
-        mental_health_data = mental_health_data.filter((d) => d["mental_health"] <= 30);
-        mental_health_data = mental_health_data.filter((d) => d["sleephrs"] <= 24);
+      mental_health_data.forEach((d) => {
+        d.value = +d.value;
+      });
 
-        const mh_scale = d3.scaleLinear().domain([0, 40]).range([chartHeight_s, 0]);
-        let leftAxis_s = d3.axisLeft(mh_scale);
+      mental_health_data = mental_health_data.filter((d) => d["mental_health"] <= 30);
+      mental_health_data = mental_health_data.filter((d) => d["sleephrs"] <= 24);
 
-        chart_s.append("g")
+      const mh_scale = d3.scaleLinear().domain([0, 40]).range([chartHeight_s, 0]);
+      let leftAxis_s = d3.axisLeft(mh_scale);
+
+      chart_s.append("g")
         .attr("class", "y axis")
-        .attr("transform",`translate(${margin_s.left-10},${margin_s.top})`)
+        .attr("transform", `translate(${margin_s.left - 10},${margin_s.top})`)
         .call(leftAxis_s)
 
-        let yGridlines = d3.axisLeft(mh_scale)
+      let yGridlines = d3.axisLeft(mh_scale)
         .tickSize(-chartWidth_s - 10)
         .tickFormat("")
 
-        chart_s.append("g")
+      chart_s.append("g")
         .attr("class", "y gridlines")
         .attr("transform", `translate(${margin_s.left - 10},${margin_s.top})`)
         .call(yGridlines);
 
+      presentSleepData();
+      d3.select("#sleep").classed('active-sel3', true);
+
+
+      d3.select("#sleep").on("click", function (event) {
         presentSleepData();
-
-
-        d3.select("#sleep").on("click", function (event) {
-          presentSleepData();
-          d3.selectAll('.data-sel').classed('active-sel3', false);
-          d3.select(this).classed('active-sel3', true);      
+        d3.selectAll('.data-sel').classed('active-sel3', false);
+        d3.select(this).classed('active-sel3', true);
       });
 
       d3.select("#weight").on("click", function (event) {
-          presentWeightData();
-          d3.selectAll('.data-sel').classed('active-sel3', false);
-          d3.select(this).classed('active-sel3', true);      
+        presentWeightData();
+        d3.selectAll('.data-sel').classed('active-sel3', false);
+        d3.select(this).classed('active-sel3', true);
       });
 
       d3.select("#alcohol").on("click", function (event) {
-          presentAlcData();
-          d3.selectAll('.data-sel').classed('active-sel3', false);
-          d3.select(this).classed('active-sel3', true);      
+        presentAlcData();
+        d3.selectAll('.data-sel').classed('active-sel3', false);
+        d3.select(this).classed('active-sel3', true);
       });
 
-          function presentSleepData() {
-            
-            chart_s.selectAll(".x.axis").remove();
-            chart_s.selectAll(".x.gridlines").remove();
-            chart_s.selectAll("path").remove();
-            d3.select('#scatterTitle')
-            .text('Hours of Sleep vs. Poor Mental Health')
+      function presentSleepData() {
 
-            const sleep_scale = d3.scaleLinear().domain([0, 12]).range([0, chartWidth_s]);
-            let sleep_axis = d3.axisBottom(sleep_scale);
+        chart_s.selectAll(".x.axis").remove();
+        chart_s.selectAll(".x.gridlines").remove();
+        chart_s.selectAll("path").remove();
+        d3.select('#scatterTitle')
+          .text('Hours of Sleep vs. Poor Mental Health')
 
-            chart_s.append("g")
-            .attr("class", "x axis")
-            .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
-            .transition()
-            .duration(500)
-            .call(sleep_axis);
+        const sleep_scale = d3.scaleLinear().domain([0, 12]).range([0, chartWidth_s]);
+        let sleep_axis = d3.axisBottom(sleep_scale);
 
-            let xGridlines = d3.axisBottom(sleep_scale)
-            .tickSize(-chartHeight_s - 10)
-            .tickFormat("")
+        chart_s.append("g")
+          .attr("class", "x axis")
+          .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
+          .transition()
+          .duration(500)
+          .call(sleep_axis);
 
-            chart_s.append("g")
-            .attr("class", "x gridlines")
-            .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
-            .call(xGridlines);
+        let xGridlines = d3.axisBottom(sleep_scale)
+          .tickSize(-chartHeight_s - 10)
+          .tickFormat("")
 
-            var sleepData = d3.contourDensity()
-            .x(function(d) { return sleep_scale(d.sleephrs); })
-            .y(function(d) { return mh_scale(d.mental_health); })
-            .size([width, height])
-            .bandwidth(20)    // smaller = more precision in lines = more lines
-            (mental_health_data)
+        chart_s.append("g")
+          .attr("class", "x gridlines")
+          .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
+          .call(xGridlines);
 
-            chart_s.selectAll("path")
-            .data(sleepData)
-            .enter()
-            .append("path")
-            .attr("d", d3.geoPath())
-            .attr("fill", "rgba(102, 153, 255, 0.3)")
-            .attr("stroke", "blue")
-            .attr("stroke-linejoin", "round")
-          }
+        var sleepData = d3.contourDensity()
+          .x(function (d) { return sleep_scale(d.sleephrs); })
+          .y(function (d) { return mh_scale(d.mental_health); })
+          .size([width, height])
+          .bandwidth(20)    // smaller = more precision in lines = more lines
+          (mental_health_data)
 
-          function presentWeightData() {
-            chart_s.selectAll(".x.axis").remove();
-            chart_s.selectAll(".x.gridlines").remove();
-            chart_s.selectAll("path").remove();
-            d3.select('#scatterTitle')
-            .text('Body Weight (lbs) vs. Poor Mental Health')
-
-            const weight_scale = d3.scaleLinear().domain([0, 300]).range([0, chartWidth_s]);
-            let weight_axis = d3.axisBottom(weight_scale);
-
-            chart_s.append("g")
-            .attr("class", "x axis")
-            .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
-            .transition()
-            .duration(500)
-            .call(weight_axis);
-
-            let xGridlines = d3.axisBottom(weight_scale)
-            .tickSize(-chartHeight_s - 10)
-            .tickFormat("")
-
-            chart_s.append("g")
-            .attr("class", "x gridlines")
-            .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
-            .call(xGridlines);
-
-            var weightData = d3.contourDensity()
-            .x(function(d) { return weight_scale(d.weight); })
-            .y(function(d) { return mh_scale(d.mental_health); })
-            .size([width, height])
-            .bandwidth(20)
-            (mental_health_data)
-
-            chart_s.selectAll("path")
-            .data(weightData)
-            .enter()
-            .append("path")
-            .attr("d", d3.geoPath())
-            .attr("fill", "rgba(153, 255, 153, 0.3)")
-            .attr("stroke", "green")
-            .attr("stroke-linejoin", "round")
-          }
-
-          function presentAlcData() {
-            mental_health_data_alc = mental_health_data.filter((d) => d["alcohol"] <= 76);
-            chart_s.selectAll(".x.axis").remove();
-            chart_s.selectAll(".x.gridlines").remove();
-            chart_s.selectAll("path").remove();
-            d3.select('#scatterTitle')
-            .text('Alcohol Consumption vs. Poor Mental Health')
-
-            const alc_scale = d3.scaleLinear().domain([-1, 6]).range([0, chartWidth_s]);
-            let alc_axis = d3.axisBottom(alc_scale);
-
-            chart_s.append("g")
-            .attr("class", "x axis")
-            .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
-            .transition()
-            .duration(500)
-            .call(alc_axis);
-
-            let xGridlines = d3.axisBottom(alc_scale)
-            .tickSize(-chartHeight_s - 10)
-            .tickFormat("")
-
-            chart_s.append("g")
-            .attr("class", "x gridlines")
-            .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
-            .call(xGridlines);
-
-            var alcData = d3.contourDensity()
-            .x(function(d) { return alc_scale(d.alcohol); })
-            .y(function(d) { return mh_scale(d.mental_health); })
-            .size([width, height])
-            .bandwidth(20)
-            (mental_health_data_alc)
-
-            chart_s.selectAll("path")
-            .data(alcData)
-            .enter()
-            .append("path")
-            .attr("d", d3.geoPath())
-            .attr("fill", "rgba(255, 255, 153, 0.3)")
-            .attr("stroke", "red")
-            .attr("stroke-linejoin", "round")
-          }
+        chart_s.selectAll("path")
+          .data(sleepData)
+          .enter()
+          .append("path")
+          .attr("d", d3.geoPath())
+          .attr("fill", "rgba(102, 153, 255, 0.3)")
+          .attr("stroke", "blue")
+          .attr("stroke-linejoin", "round")
       }
-      reqeustScatterData();
-      
 
-    </script>
+      function presentWeightData() {
+        chart_s.selectAll(".x.axis").remove();
+        chart_s.selectAll(".x.gridlines").remove();
+        chart_s.selectAll("path").remove();
+        d3.select('#scatterTitle')
+          .text('Body Weight (lbs) vs. Poor Mental Health')
+
+        const weight_scale = d3.scaleLinear().domain([0, 300]).range([0, chartWidth_s]);
+        let weight_axis = d3.axisBottom(weight_scale);
+
+        chart_s.append("g")
+          .attr("class", "x axis")
+          .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
+          .transition()
+          .duration(500)
+          .call(weight_axis);
+
+        let xGridlines = d3.axisBottom(weight_scale)
+          .tickSize(-chartHeight_s - 10)
+          .tickFormat("")
+
+        chart_s.append("g")
+          .attr("class", "x gridlines")
+          .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
+          .call(xGridlines);
+
+        var weightData = d3.contourDensity()
+          .x(function (d) { return weight_scale(d.weight); })
+          .y(function (d) { return mh_scale(d.mental_health); })
+          .size([width, height])
+          .bandwidth(20)
+          (mental_health_data)
+
+        chart_s.selectAll("path")
+          .data(weightData)
+          .enter()
+          .append("path")
+          .attr("d", d3.geoPath())
+          .attr("fill", "rgba(153, 255, 153, 0.3)")
+          .attr("stroke", "green")
+          .attr("stroke-linejoin", "round")
+      }
+
+      function presentAlcData() {
+        mental_health_data_alc = mental_health_data.filter((d) => d["alcohol"] <= 76);
+        chart_s.selectAll(".x.axis").remove();
+        chart_s.selectAll(".x.gridlines").remove();
+        chart_s.selectAll("path").remove();
+        d3.select('#scatterTitle')
+          .text('Alcohol Consumption vs. Poor Mental Health')
+
+        const alc_scale = d3.scaleLinear().domain([-1, 6]).range([0, chartWidth_s]);
+        let alc_axis = d3.axisBottom(alc_scale);
+
+        chart_s.append("g")
+          .attr("class", "x axis")
+          .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
+          .transition()
+          .duration(500)
+          .call(alc_axis);
+
+        let xGridlines = d3.axisBottom(alc_scale)
+          .tickSize(-chartHeight_s - 10)
+          .tickFormat("")
+
+        chart_s.append("g")
+          .attr("class", "x gridlines")
+          .attr("transform", `translate(${margin_s.left},${chartHeight_s + margin_s.top + 10})`)
+          .call(xGridlines);
+
+        var alcData = d3.contourDensity()
+          .x(function (d) { return alc_scale(d.alcohol); })
+          .y(function (d) { return mh_scale(d.mental_health); })
+          .size([width, height])
+          .bandwidth(20)
+          (mental_health_data_alc)
+
+        chart_s.selectAll("path")
+          .data(alcData)
+          .enter()
+          .append("path")
+          .attr("d", d3.geoPath())
+          .attr("fill", "rgba(255, 255, 153, 0.3)")
+          .attr("stroke", "red")
+          .attr("stroke-linejoin", "round")
+      }
+    }
+    reqeustScatterData();
+
+
+  </script>
 
   </div>
 
