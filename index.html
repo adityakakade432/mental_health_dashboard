@@ -41,16 +41,17 @@
     }
 
     #lollipop {
-      outline: 5px solid rgb(180, 223, 230);
-      grid-column: 2;
+      outline: 5px solid rgb(223, 189, 253);
       margin: auto;
+      display: block;
       border-radius: 20px;
     }
 
     #scatter {
-      outline: 5px solid rgb(180, 223, 230);
+      outline: 5px solid rgb(198, 255, 222);
       grid-column: 2;
       margin: auto;
+      display: block;
       border-radius: 20px;
     }
 
@@ -64,6 +65,21 @@
       background-color: rgb(203, 247, 255);      
       padding-bottom: 60px;
       padding-top: 40px;
+      margin-bottom: 60px;
+    }
+
+    .lollipop{      
+      background-color: rgb(237, 218, 254);      
+      padding-bottom: 60px;
+      padding-top: 40px;   
+      margin-bottom: 60px;   
+    }
+
+    .vis3{      
+      background-color: rgb(218, 254, 233);      
+      padding-bottom: 60px;
+      padding-top: 40px;      
+      margin-bottom: 60px;
     }
 
     .wrapper {
@@ -77,8 +93,7 @@
       margin-top: auto;
       margin-bottom: auto;
       margin-left: 2px;
-      margin-right: 2px;
-      background-color: rgb(180, 223, 230);
+      margin-right: 2px;      
       border: none;
       color: white;
       padding: 15px 32px;
@@ -91,12 +106,32 @@
       border-radius: 20px;
     }
 
+    .vis1-button{
+      background-color: rgb(180, 223, 230);
+    }
+
+    .vis2-button{
+      background-color: rgb(216, 180, 230);
+    }
+
+    .vis3-button{
+      background-color: rgb(180, 230, 190);
+    }
+
     .data-sel:hover {
       background-color: rgb(43, 124, 217);
     }
 
-    .active-sel {
+    .active-sel1 {
       background-color: rgb(130, 179, 236);
+    }
+
+    .active-sel2 {
+      background-color: rgb(212, 156, 234);
+    }
+
+    .active-sel3 {
+      background-color: rgb(156, 232, 171);
     }
 
     .dep-title {
@@ -163,8 +198,8 @@
 
 <body>
   <div class = "vis1">
-  <h1 style="margin: auto;">Correlation of Depression Rates to Various Factors </h1>
-  <div class="wrapper">
+    <h1 style="margin: auto;">Correlation of Depression Rates to Various Factors </h1>
+    <div class="wrapper">
     
       <div class="column">
         <h2 id="depMap" class="dep-title">US Depression Rates</h2>
@@ -180,13 +215,13 @@
         <svg id="graph2" height="475" width="650"
           style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:10px"></svg>
         <div class="buttons">
-          <button id="temperatures" class="data-sel">Average Temperatures (F)</button>
-          <button id="sunlight" class="data-sel">Average Sunlight (Hrs)</button>
-          <button id="income" class="data-sel">Median Household Income ($)</button>
+          <button id="temperatures" class="data-sel vis1-button">Average Temperatures (F)</button>
+          <button id="sunlight" class="data-sel vis1-button">Average Sunlight (Hrs)</button>
+          <button id="income" class="data-sel vis1-button">Median Household Income ($)</button>
         </div>
       </div>
+    </div>
   </div>
-</div>
 
     <script>
       const svg_dep = d3.select("#choropleth_dep");
@@ -710,50 +745,44 @@
       d3.select("#temperatures").on("click", function (event) {
         clearChart();
         requestChartData(1)
-        d3.selectAll('.data-sel').classed('active-sel', false);
-        d3.select(this).classed('active-sel', true);
         requestChoroplethData(1)
         d3.select('#changeMap')
           .text('US Average Temperatures')
         d3.select('#chartTitle')
           .text('Temperature vs. Depression')
-        d3.selectAll('.data-sel').classed('active-sel', false);
-        d3.select(this).classed('active-sel', true);
+        d3.selectAll('.data-sel').classed('active-sel1', false);
+        d3.select(this).classed('active-sel1', true);
 
       });
 
       d3.select("#sunlight").on("click", function (event) {
         clearChart();
         requestChartData(2)
-        d3.selectAll('.data-sel').classed('active-sel', false);
-        d3.select(this).classed('active-sel', true);
+        d3.selectAll('.data-sel').classed('active-sel1', false);
+        d3.select(this).classed('active-sel1', true);
         requestChoroplethData(2)
         d3.select('#changeMap')
           .text('US Average Sunlight')
         d3.select('#chartTitle')
           .text('Sunlight vs. Depression')
-        d3.selectAll('.data-sel').classed('active-sel', false);
-        d3.select(this).classed('active-sel', true);
 
       });
 
       d3.select("#income").on("click", function (event) {
         clearChart();
         requestChartData(3)
-        d3.selectAll('.data-sel').classed('active-sel', false);
-        d3.select(this).classed('active-sel', true);
+        d3.selectAll('.data-sel').classed('active-sel1', false);
+        d3.select(this).classed('active-sel1', true);
         requestChoroplethData(3)
         d3.select('#changeMap')
           .text('US Median Income')
         d3.select('#chartTitle')
           .text('Income vs. Depression')
-        d3.selectAll('.data-sel').classed('active-sel', false);
-        d3.select(this).classed('active-sel', true);
 
       });
 
-      d3.select("#temperatures").classed('active-sel', true);
-      d3.select("#temperatures").classed('active-sel', true);
+      d3.select("#temperatures").classed('active-sel1', true);
+      d3.select("#temperatures").classed('active-sel1', true);
       clearChart();
       requestChoroplethData(1);
       requestChartData(1);
@@ -765,9 +794,9 @@
       <svg id="lollipop" height="600" width="700"
         style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:20px"></svg>
       <div class="buttons">
-        <button id="Anxiety" class="data-sel">Anxiety</button>
-        <button id="Depression" class="data-sel">Depression</button>
-        <button id="Bipolar" class="data-sel">Bipolar</button>
+        <button id="Anxiety" class="data-sel vis2-button">Anxiety</button>
+        <button id="Depression" class="data-sel vis2-button">Depression</button>
+        <button id="Bipolar" class="data-sel vis2-button">Bipolar</button>
       </div>
     </div>
 
@@ -798,8 +827,12 @@
         xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
         const colorScale = d3.scaleOrdinal(d3.schemePuBuGn[9]).domain(data.map(d => d.Temp) );
         const lollipops = chart_l.selectAll(".lollipop").data(data).join("g").attr("class", "lollipop"); 
-        d3.select("#Anxiety").on("click", () => {
-svg_l.selectAll("text").remove();
+        d3.select("#Anxiety").on("click", function(event) {
+          svg_l.selectAll("text").remove();
+
+        d3.selectAll('.data-sel').classed('active-sel2', false);
+        d3.select(this).classed('active-sel2', true);
+
           xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
           svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 3).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
           .text(" Anxiety Disorders (Share of Population)");
@@ -863,8 +896,10 @@ svg_l.selectAll("text").remove();
           //yAxisArea.append("g").attr("class", "y axis").call(yAxis);//found on internet
 
         });
-        d3.select("#Depression").on("click", () => {
-svg_l.selectAll('text').remove();
+        d3.select("#Depression").on("click", function(event) {
+          svg_l.selectAll('text').remove();
+          d3.selectAll('.data-sel').classed('active-sel2', false);
+          d3.select(this).classed('active-sel2', true);
           xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
           svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 3).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
           .text(" Depressive Disorders (Share of Population)");
@@ -925,8 +960,10 @@ svg_l.selectAll('text').remove();
 
 
         });
-        d3.select("#Bipolar").on("click", () => {
-svg_l.selectAll('text').remove();
+        d3.select("#Bipolar").on("click", function(event) {
+          svg_l.selectAll('text').remove();
+          d3.selectAll('.data-sel').classed('active-sel2', false);
+          d3.select(this).classed('active-sel2', true);
           xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
           svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 1.5).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
           .text(" Bipolar Disorders (Share of Population)");
@@ -990,56 +1027,17 @@ svg_l.selectAll('text').remove();
     
     })
 
-      // const requestData = async function() {
-      //   const data_l = await d3.csv("./data/Data-Climate.csv");
-      //   data_l.then((data)=>{
-      //     console.log(data); 
-      //   })
-      //   console.log(data_l); 
-      //   const scalePoint = d3.scalePoint().domain(d3.map(data_l, d => d['Year'])).range([10,chartWidth_l-10]).padding(0.2);
-      //   const yScale = d3.scaleLinear().range([10, chartHeight_l-10]);
-      //   let bottomAxis = d3.axisBottom(scalePoint); 
-      //   xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
-      //   //yScale.domain(d3.map(data_l, d=>d[svar])); 
-
-
-        
-
-       
-      
-      //    function change(svariable) {
-      //      yScale.domain(d3.map(data_l, d=>d[svariable])); 
-      //   //yAxis.transition().duration(1000).call(d3.axisLeft(yScale));
-      //     let yAxis = d3.axisLeft(yScale); //.tickFormat(formatPercent); 
-      //     yAxisArea.append("g").attr("class", "y axis").call(yAxis);//found on internet
-
-      //    }
-      //    d3.select("#Anxiety").on("click", () => {
-       
-      //     change("Anxiety"); });
-      //    d3.select("#Depression").on("click", () => {
-      //     change("Depression"); });
-      //     d3.select("#Bipolar").on("click", () => {
-      //     change("Bipolar")
-      
-      //     });
-
-
-      // }
-
-      
-      //requestData();
       
     </script>
 
-<div class="column">
+<div class="vis3">
       <h1 id="scatterTitle" class="chart-title">Hours of Sleep vs. Mental Health</h1>
       <svg id="scatter" height="600" width="700"
         style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:10px"></svg>
       <div class="buttons">
-        <button id="sleep" class="data-sel">Hours of Sleep</button>
-        <button id="weight" class="data-sel">Body Weight (lbs)</button>
-        <button id="alcohol" class="data-sel">Alcohol Consumption</button>
+        <button id="sleep" class="data-sel vis3-button">Hours of Sleep</button>
+        <button id="weight" class="data-sel vis3-button">Body Weight (lbs)</button>
+        <button id="alcohol" class="data-sel vis3-button">Alcohol Consumption</button>
       </div>
   </div>
 
@@ -1094,13 +1092,27 @@ svg_l.selectAll('text').remove();
 
         presentSleepData();
 
-        d3.select("#sleep").on("click", presentSleepData);
 
-          d3.select("#weight").on("click", presentWeightData)
-          
-          d3.select("#alcohol").on("click", presentAlcData)
+        d3.select("#sleep").on("click", function (event) {
+          presentSleepData();
+          d3.selectAll('.data-sel').classed('active-sel3', false);
+          d3.select(this).classed('active-sel3', true);      
+      });
+
+      d3.select("#weight").on("click", function (event) {
+          presentWeightData();
+          d3.selectAll('.data-sel').classed('active-sel3', false);
+          d3.select(this).classed('active-sel3', true);      
+      });
+
+      d3.select("#alcohol").on("click", function (event) {
+          presentAlcData();
+          d3.selectAll('.data-sel').classed('active-sel3', false);
+          d3.select(this).classed('active-sel3', true);      
+      });
 
           function presentSleepData() {
+            
             chart_s.selectAll(".x.axis").remove();
             chart_s.selectAll(".x.gridlines").remove();
             chart_s.selectAll("path").remove();
