@@ -7,7 +7,7 @@
 
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
 
     h1 {
@@ -144,14 +144,12 @@
       text-align: center;
       grid-column: 1;
       margin: auto;
-      font-family: sans-serif;
     }
 
     .change-title {
       text-align: center;
       grid-column: 1;
       margin: auto;
-      font-family: sans-serif;
     }
 
     .chart-title {
@@ -164,7 +162,7 @@
       grid-column: 1 / 3;
       margin: auto;
       font-size: 70;
-      color: rgb(130, 179, 236);
+      color: rgb(17, 6, 92)
     }
 
     .title-description {
@@ -200,12 +198,29 @@
       stroke: lightgray;
     }
 
+    .graph-descr {
+      text-align: center;
+      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    }
+
+    .title-bar {
+      background-color: rgb(253, 206, 255);
+      margin-bottom: 20;
+    }
   </style>
 </head>
 
 <body>
+  <div class="title-bar">
+    <h1 class="overall-title">Mental Health in The United States</h1>
+  </div>
   <div class="vis1">
     <h1 style="margin: auto;">Correlation of Depression Rates to Various Factors </h1>
+    <p class="graph-descr">How does each state's depression rate correlate to geographic
+      & economic factors <br> such as Hours of Sunlight, Family Income, and Average Temperature? Switch <br>
+      between factors and their Pearson Correlations using the buttons and
+      <br> hover over each state to view the statstic.
+    </p>
     <div class="wrapper">
 
       <div class="column">
@@ -303,11 +318,12 @@
         });
       console.log(income_data_map)
 
-      var colorQuintiles = ["#6efad7", "#00d5e8", "#00abf7", "#0079ee", "#5536bb"];//['#bfe7ff', '#82c7f2', '#3ab4e1', '#6bc9aa', '#00c0a0'];
-      const temp_color_scale = d3.scaleQuantile().domain(temp_individual).range(colorQuintiles);
+      var colorQuintiles = ["#6efad7", "#00d5e8", "#00abf7", "#0079ee", "#5536bb"];
+      var colorQuintilesRev = ["#5536bb", "#0079ee", "#00abf7", "#00d5e8", "#6efad7"];
+      const temp_color_scale = d3.scaleQuantile().domain(temp_individual).range(colorQuintilesRev);
       const depression_color_scale = d3.scaleQuantile().domain(depression_individual).range(colorQuintiles);
-      const sunlight_color_scale = d3.scaleQuantile().domain(sunlight_individual).range(colorQuintiles);
-      const income_color_scale = d3.scaleQuantile().domain(income_individual).range(colorQuintiles);
+      const sunlight_color_scale = d3.scaleQuantile().domain(sunlight_individual).range(colorQuintilesRev);
+      const income_color_scale = d3.scaleQuantile().domain(income_individual).range(colorQuintilesRev);
 
       let statePaths_dep = map_dep.selectAll("path.state")
         .data(states.features)
@@ -415,7 +431,7 @@
           var yPos = y - 25;
 
           tooltip1.select("#depression-text")
-            .text(`${stateNum[d.id]}: ${depression_val}`);
+            .text(`${stateNum[d.id]}: ${depression_val}%`);
 
           const textElement = tooltip1.select("#depression-text");
           const textBoundingBox = textElement.node().getBBox();
@@ -476,7 +492,7 @@
 
           const textElement = tooltip2.select("#change-text");
           const textBoundingBox = textElement.node().getBBox();
-          const tooltipWidth = textBoundingBox.width + 20; // Add some padding
+          const tooltipWidth = textBoundingBox.width + 20;
 
           if (xPos + tooltipWidth > width_dep) {
             console.log(xPos);
@@ -487,11 +503,11 @@
           tooltip2.attr("transform", `translate(${xPos},${yPos})`);
 
           tooltip2.select("rect")
-            .attr("width", tooltipWidth) // Set the calculated width
+            .attr("width", tooltipWidth)
             .attr("height", tooltipHeight);
 
           textElement
-            .attr("x", tooltipWidth / 2) // Center the text in the tooltip
+            .attr("x", tooltipWidth / 2)
 
 
           changeMesh.attr("d", path_change(d))
@@ -521,11 +537,11 @@
 
     function calculatePearsonCorrelation(xValues, yValues) {
 
-      // Calculate the means of x and y
+
       const xMean = xValues.reduce((acc, x) => acc + x, 0) / xValues.length;
       const yMean = yValues.reduce((acc, y) => acc + y, 0) / yValues.length;
 
-      // Calculate the sums of the products and squared deviations
+
       let sumOfProducts = 0;
       let sumOfSquaredDeviationsX = 0;
       let sumOfSquaredDeviationsY = 0;
@@ -539,7 +555,7 @@
         sumOfSquaredDeviationsY += deviationY ** 2;
       }
 
-      // Calculate the Pearson correlation coefficient
+
       const r = sumOfProducts / (Math.sqrt(sumOfSquaredDeviationsX) * Math.sqrt(sumOfSquaredDeviationsY));
       return r;
     }
@@ -673,7 +689,7 @@
         .attr("fill", "white")
         .attr("x", 20 + 110)
         .attr("y", 325 + 17)
-        .attr("text-anchor", "middle") // Center the text horizontally
+        .attr("text-anchor", "middle")
         .attr("alignment-baseline", "middle")
         .text("Pearson Correlation: " + d3.format(".3f")(correlationCoefficient));
 
@@ -797,7 +813,11 @@
   </script>
 
   <div class="lollipop">
-    <h1 id="Title" class="chart-title">Mental Health Stats vs Yearly Temperature</h1>
+    <h1 id="Title" class="chart-title">Mental Health Disorders vs Yearly Temperature</h1>
+    <p class="graph-descr">How have the occurences of Anxiety, Depression, and BPD changed over the years,<br>
+      and are they related to average temperature? Hover on each point to see that year's<br>
+      average temperature, and use the buttons to switch between disorders.
+    </p>
     <svg id="lollipop" height="500" width="700"
       style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:20px"></svg>
     <div class="buttons">
@@ -830,7 +850,7 @@
       const colorScale = d3.scaleOrdinal(d3.schemePuBuGn[9]).domain(data.map(d => d.Temp));
       const lollipops = chart_l.selectAll(".lollipop").data(data).join("g").attr("class", "lollipop");
 
-      
+
 
       async function showAnxiety() {
         svg_l.selectAll("text").remove();
@@ -870,7 +890,7 @@
           var xPos = scalePoint(d.Year) + 15;
 
           temp = d['Temp'];
-          //y2020 = percentScale(d['2020']);
+
           label.text(temp + '\u00B0F');
           y = yScale(d['Anxiety']);
 
@@ -896,7 +916,7 @@
         yScale.domain(d3.extent(d3.map(data, d => d.Depression)));
         let yAxis = d3.axisLeft(yScale);
         yAxisArea.transition().duration(1000).call(yAxis);
-        //const lollipops = chart_l.selectAll(".lollipop").data(data).join("g").attr("class", "lollipop"); 
+
         lollipops.each(function (d) {
           cool = d3.select(this);
           cool.selectAll("circle").remove();
@@ -921,7 +941,7 @@
           var xPos = scalePoint(d.Year) + 15;
 
           temp = d['Temp'];
-          //y2020 = percentScale(d['2020']);
+
           label.text(temp + '\u00B0F');
           y = yScale(d['Depression']);
 
@@ -1018,12 +1038,16 @@
   <div class="vis3">
     <h1>Correlation of Poor Mental Health to Various Factors</h1>
     <h2 id="scatterTitle" class="chart-title">Correlation of Poor Mental Health to Various Factors</h2>
+    <p class="graph-descr">How do lifestyle factors such as Alcohol Consumption, Hours of Sleep, and Body Weight<br>
+      contribute to the amount of Poor Mental Health days US residents have per month on average? <br>
+      Click on each factor to view the associated contour plot!
+    </p>
     <svg id="scatter" height="500" width="700"
       style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:10px"></svg>
     <div class="buttons">
       <button id="sleep" class="data-sel vis3-button">Hours of Sleep</button>
       <button id="weight" class="data-sel vis3-button">Body Weight (lbs)</button>
-      <button id="alcohol" class="data-sel vis3-button">Alcohol Consumption</button>
+      <button id="alcohol" class="data-sel vis3-button">Alcohol Consumption (#Drinks/Week)</button>
     </div>
   </div>
 
@@ -1129,7 +1153,7 @@
           .x(function (d) { return sleep_scale(d.sleephrs); })
           .y(function (d) { return mh_scale(d.mental_health); })
           .size([width, height])
-          .bandwidth(20)    // smaller = more precision in lines = more lines
+          .bandwidth(20)
           (mental_health_data)
 
         chart_s.selectAll("path")
