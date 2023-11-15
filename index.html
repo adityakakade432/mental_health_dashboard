@@ -7,6 +7,7 @@
 
   <style>
     body {
+      background-color:rgb(253, 255, 206);
       font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
 
@@ -160,9 +161,13 @@
 
     .overall-title {
       grid-column: 1 / 3;
-      margin: auto;
       font-size: 70;
-      color: rgb(17, 6, 92)
+      margin-bottom: 20px;
+    }
+    .overall-subtitle {
+      text-align: center;
+      font-size: 30;
+      margin-top: 0;
     }
 
     .title-description {
@@ -204,8 +209,9 @@
     }
 
     .title-bar {
-      background-color: rgb(253, 206, 255);
-      margin-bottom: 20;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      margin-bottom: 40px;
     }
   </style>
 </head>
@@ -213,21 +219,25 @@
 <body>
   <div class="title-bar">
     <h1 class="overall-title">Mental Health in The United States</h1>
+    <h2 class = "overall-subtitle">INFO 3300 Project 2</h2>
+    <p style="text-align: center;">Aditya Kakade, Bhadra Bejoy, Gabby Fite, Richie Sun</p>
+
   </div>
+
   <div class="vis1">
     <h1 style="margin: auto;">Correlation of Depression Rates to Various Factors </h1>
     <p class="graph-descr">How does each state's depression rate correlate to geographic
-      & economic factors <br> such as Hours of Sunlight, Family Income, and Average Temperature? Switch <br>
-      between factors and their Pearson Correlations using the buttons and
-      <br> hover over each state to view the statstic.
+      & economic factors such as Hours of Sunlight,<br>Family Income, and Average Temperature? Switch
+      between factors and their Pearson Correlations using the buttons <br>and
+      hover over each state to view the statstic or each point to see the associated state.
     </p>
     <div class="wrapper">
 
       <div class="column">
-        <h2 id="depMap" class="dep-title">US Depression Rates</h2>
+        <h2 id="depMap" class="dep-title">US Depression Rates (% of Population)</h2>
         <svg id="choropleth_dep" height="250" width="650"
           style="background: rgb(255, 255, 255); margin-bottom:25px; margin-top:10px"></svg>
-        <h2 id="changeMap" class="change-title">US Average Temperatures</h2>
+        <h2 id="changeMap" class="change-title">US Average Temperatures (&deg;F)</h2>
         <svg id="choropleth_change" height="250" width="650"
           style="background: rgb(255, 255, 255); margin-top:10px"></svg>
       </div>
@@ -771,7 +781,7 @@
       requestChartData(1)
       requestChoroplethData(1)
       d3.select('#changeMap')
-        .text('US Average Temperatures')
+        .text('US Average Temperatures (\u00B0F)')
       d3.select('#chartTitle')
         .text('Temperature vs. Depression')
       d3.selectAll('.data-sel').classed('active-sel1', false);
@@ -786,7 +796,7 @@
       d3.select(this).classed('active-sel1', true);
       requestChoroplethData(2)
       d3.select('#changeMap')
-        .text('US Average Sunlight')
+        .text('US Average Sunlight (Hrs)')
       d3.select('#chartTitle')
         .text('Sunlight vs. Depression')
 
@@ -799,7 +809,7 @@
       d3.select(this).classed('active-sel1', true);
       requestChoroplethData(3)
       d3.select('#changeMap')
-        .text('US Median Income')
+        .text('US Median Income ($)')
       d3.select('#chartTitle')
         .text('Income vs. Depression')
 
@@ -814,9 +824,9 @@
 
   <div class="lollipop">
     <h1 id="Title" class="chart-title">Mental Health Disorders vs Yearly Temperature</h1>
-    <p class="graph-descr">How have the occurences of Anxiety, Depression, and BPD changed over the years,<br>
-      and are they related to average temperature? Hover on each point to see that year's<br>
-      average temperature, and use the buttons to switch between disorders.
+    <p class="graph-descr">How have the occurences of Anxiety, Depression, and BPD changed over the years,
+      <br>and are they related to average temperature? Hover on each point to see that year's
+      average temperature,<br>and use the buttons to switch between disorders.
     </p>
     <svg id="lollipop" height="500" width="700"
       style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:20px"></svg>
