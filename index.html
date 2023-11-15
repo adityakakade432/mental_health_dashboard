@@ -7,7 +7,7 @@
 
   <style>
     body {
-      background-color:rgb(253, 255, 206);
+      background-color: rgb(253, 255, 206);
       font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
 
@@ -43,7 +43,7 @@
       border-radius: 20px;
     }
 
-    #scatter {
+    #contour {
       outline: 5px solid rgb(198, 255, 222);
       grid-column: 2;
       margin: auto;
@@ -164,6 +164,7 @@
       font-size: 70;
       margin-bottom: 20px;
     }
+
     .overall-subtitle {
       text-align: center;
       font-size: 30;
@@ -219,7 +220,7 @@
 <body>
   <div class="title-bar">
     <h1 class="overall-title">Mental Health in The United States</h1>
-    <h2 class = "overall-subtitle">INFO 3300 Project 2</h2>
+    <h2 class="overall-subtitle">INFO 3300 Project 2</h2>
     <p style="text-align: center;">Aditya Kakade, Bhadra Bejoy, Gabby Fite, Richie Sun</p>
 
   </div>
@@ -1047,12 +1048,12 @@
 
   <div class="vis3">
     <h1>Correlation of Poor Mental Health to Various Factors</h1>
-    <h2 id="scatterTitle" class="chart-title">Correlation of Poor Mental Health to Various Factors</h2>
+    <h2 id="contourTitle" class="chart-title">Correlation of Poor Mental Health to Various Factors</h2>
     <p class="graph-descr">How do lifestyle factors such as Alcohol Consumption, Hours of Sleep, and Body Weight<br>
       contribute to the amount of Poor Mental Health days US residents have per month on average? <br>
       Click on each factor to view the associated contour plot!
     </p>
-    <svg id="scatter" height="500" width="700"
+    <svg id="contour" height="500" width="700"
       style="background: rgb(255, 255, 255); margin-bottom:20px; margin-top:10px"></svg>
     <div class="buttons">
       <button id="sleep" class="data-sel vis3-button">Hours of Sleep</button>
@@ -1063,7 +1064,7 @@
 
   <script>
 
-    const svg_s = d3.select("svg#scatter");
+    const svg_s = d3.select("svg#contour");
     const width_s = svg_s.attr("width");
     const height_s = svg_s.attr("height");
     const margin_s = { top: 40, right: 40, bottom: 65, left: 65 };
@@ -1073,6 +1074,7 @@
     let chart_s = svg_s.append("g").attr("id", "points")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
+    // Create y-axis label
     chart_s.append("text")
       .attr("class", "y label")
       .attr("text-anchor", "end")
@@ -1082,10 +1084,13 @@
       .attr("transform", "rotate(-90)")
       .text("Poor Mental Health (Days per Month)");
 
+    // Function to request and process contour data
+    async function reqeustContourData() {
 
-    async function reqeustScatterData() {
+      // Load CSV data
       var mental_health_data = await d3.csv("./data/brfss2020subset.csv", d3.autotype)
 
+      // Process and tidy data
       mental_health_data.forEach((d) => {
         d.value = +d.value;
       });
@@ -1093,6 +1098,7 @@
       mental_health_data = mental_health_data.filter((d) => d["mental_health"] <= 30);
       mental_health_data = mental_health_data.filter((d) => d["sleephrs"] <= 24);
 
+      // Set up y-axis for Mental Health Days
       const mh_scale = d3.scaleLinear().domain([0, 40]).range([chartHeight_s, 0]);
       let leftAxis_s = d3.axisLeft(mh_scale);
 
@@ -1101,6 +1107,7 @@
         .attr("transform", `translate(${margin_s.left - 10},${margin_s.top})`)
         .call(leftAxis_s)
 
+      // Set up y-gridlines for Mental Health Days
       let yGridlines = d3.axisLeft(mh_scale)
         .tickSize(-chartWidth_s - 10)
         .tickFormat("")
@@ -1110,10 +1117,11 @@
         .attr("transform", `translate(${margin_s.left - 10},${margin_s.top})`)
         .call(yGridlines);
 
+      // Present default starting data for plot (hours of sleep)
       presentSleepData();
       d3.select("#sleep").classed('active-sel3', true);
 
-
+      // Setup button interactivity to switch datasets on click 
       d3.select("#sleep").on("click", function (event) {
         presentSleepData();
         d3.selectAll('.data-sel').classed('active-sel3', false);
@@ -1132,12 +1140,13 @@
         d3.select(this).classed('active-sel3', true);
       });
 
+      // Function to swap x-data to hours of sleep
       function presentSleepData() {
 
         chart_s.selectAll(".x.axis").remove();
         chart_s.selectAll(".x.gridlines").remove();
         chart_s.selectAll("path").remove();
-        d3.select('#scatterTitle')
+        d3.select('#contourTitle')
           .text('Poor Mental Health vs. Hours of Sleep')
 
         const sleep_scale = d3.scaleLinear().domain([0, 12]).range([0, chartWidth_s]);
@@ -1176,11 +1185,12 @@
           .attr("stroke-linejoin", "round")
       }
 
+      // Function to swap x-data to Body Weight in Pounds
       function presentWeightData() {
         chart_s.selectAll(".x.axis").remove();
         chart_s.selectAll(".x.gridlines").remove();
         chart_s.selectAll("path").remove();
-        d3.select('#scatterTitle')
+        d3.select('#contourTitle')
           .text('Poor Mental Health vs. Body Weight (lbs)')
 
         const weight_scale = d3.scaleLinear().domain([0, 300]).range([0, chartWidth_s]);
@@ -1219,12 +1229,13 @@
           .attr("stroke-linejoin", "round")
       }
 
+      // Function to swap x-data to Alcohol Consumption (#drinks/ week)
       function presentAlcData() {
         mental_health_data_alc = mental_health_data.filter((d) => d["alcohol"] <= 76);
         chart_s.selectAll(".x.axis").remove();
         chart_s.selectAll(".x.gridlines").remove();
         chart_s.selectAll("path").remove();
-        d3.select('#scatterTitle')
+        d3.select('#contourTitle')
           .text('Poor Mental Health vs. Alcohol Consumption')
 
         const alc_scale = d3.scaleLinear().domain([-1, 6]).range([0, chartWidth_s]);
@@ -1263,7 +1274,7 @@
           .attr("stroke-linejoin", "round")
       }
     }
-    reqeustScatterData();
+    reqeustContourData();
 
 
   </script>
