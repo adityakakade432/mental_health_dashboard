@@ -844,10 +844,10 @@
     let svg_l = d3.select('svg#lollipop');
     let width = svg_l.attr("width");
     let height = svg_l.attr("height");
-    const chartWidth_l = width - margin_l.left - margin_l.right;
-    const chartHeight_l = height - margin_l.top - margin_l.bottom;
-    const yAxisArea = svg_l.append("g").attr("transform", `translate(${margin_l.left - 1.5},${margin_l.top})`);
-    const xAxisArea = svg_l.append("g").attr("transform", `translate(${margin_l.left},${chartHeight_l + 10 + margin_l.top})`);
+    const chartWidth_l = width - margin_l.left - margin_l.right; 
+    const chartHeight_l = height - margin_l.top - margin_l.bottom; 
+    const yAxisArea = svg_l.append("g").attr("transform", `translate(${margin_l.left - 1.5},${margin_l.top})`); //space of y ais g tags
+    const xAxisArea = svg_l.append("g").attr("transform", `translate(${margin_l.left},${chartHeight_l + 10 + margin_l.top})`); //space for x axis g tags
     let chart_l = svg_l.append("g").attr("id", "points")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -862,12 +862,9 @@
       const lollipops = chart_l.selectAll(".lollipop").data(data).join("g").attr("class", "lollipop");
 
 
-
+      //anxiety graph functions
       async function showAnxiety() {
-        svg_l.selectAll("text").remove();
-
-
-
+        svg_l.selectAll("text").remove(); //removes old data, found online
         xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
         svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 3).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
           .text(" Anxiety Disorders (Share of Population)");
@@ -906,7 +903,7 @@
           y = yScale(d['Anxiety']);
 
 
-          label.attr("x", xPos + 6).attr("y", y - 10).attr("text-anchor", "start");
+          label.attr("x", xPos + 6).attr("y", y -10).attr("text-anchor", "start");
 
           label.attr("visibility", "");
         }
@@ -917,11 +914,11 @@
         };
 
       }
-
+      //depression graph functions
       async function showDepression() {
         svg_l.selectAll('text').remove();
         xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
-        svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 3).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
+        svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 3 ).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
           .text(" Depressive Disorders (Share of Population)");
         svg_l.append("text").attr("text-anchor", "end").attr("x", chartWidth_l / 2 + 60).attr("y", height - 20).text("Year");
         yScale.domain(d3.extent(d3.map(data, d => d.Depression)));
@@ -969,7 +966,7 @@
 
 
       }
-
+      //functions for bipolar graph 
       async function showBipolar() {
         svg_l.selectAll('text').remove();
         xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
@@ -1019,6 +1016,7 @@
 
 
       }
+      //button functions to shift between mental health stats
 
       d3.select("#Anxiety").on("click", function (event) {
         showAnxiety();
