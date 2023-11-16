@@ -969,8 +969,8 @@
       async function showDepression() {
         svg_l.selectAll('text').remove();
         xAxisArea.append("g").attr("class", "x axis").call(bottomAxis);
-        svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 3 ).attr("x", -150).attr("dy", 20).attr("transform", "rotate(-90)")
-          .text(" Depressive Disorders (Share of Population)");
+        svg_l.append("text").transition().duration(1000).attr("text-anchor", "end").attr("y", 1.5).attr("x", -125).attr("dy", 20).attr("transform", "rotate(-90)")
+          .text("Depressive Disorders (Share of Population)");
         svg_l.append("text").attr("text-anchor", "end").attr("x", chartWidth_l / 2 + 60).attr("y", height - 20).text("Year");
         yScale.domain(d3.extent(d3.map(data, d => d.Depression)));
         let yAxis = d3.axisLeft(yScale);
