@@ -257,16 +257,19 @@
   </div>
 
   <script>
+    //Depression map
     const svg_dep = d3.select("#choropleth_dep");
+    //Other factors map
     const svg_change = d3.select("#choropleth_change");
 
+    // Getting dimensions of SVG elements
     const width_dep = svg_dep.attr("width");
     const height_dep = svg_dep.attr("height");
     const width_change = svg_change.attr("width");
     const height_change = svg_change.attr("height");
 
+    // Setting margins for the maps
     const margin = { top: 20, right: 20, bottom: 20, left: 20 };
-
     const mapWidth_dep = width_dep - margin.left - margin.right;
     const mapHeight_dep = height_dep - margin.top - margin.bottom;
     const mapWidth_change = width_change - margin.left - margin.right;
@@ -277,12 +280,18 @@
     const map_change = svg_change.append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    // Mapping state codes to their names
     const stateNum = { 1: "Alabama", 2: "Alaska", 4: "Arizona", 5: "Arkansas", 6: "California", 8: "Colorado", 9: "Connecticut", 10: "Delaware", 12: "Florida", 13: "Georgia", 15: "Hawaii", 16: "Idaho", 17: "Illinois", 18: "Indiana", 19: "Iowa", 20: "Kansas", 21: "Kentucky", 22: "Louisiana", 23: "Maine", 24: "Maryland", 25: "Massachusetts", 26: "Michigan", 27: "Minnesota", 28: "Mississippi", 29: "Missouri", 30: "Montana", 31: "Nebraska", 32: "Nevada", 33: "New Hampshire", 34: "New Jersey", 35: "New Mexico", 36: "New York", 37: "North Carolina", 38: "North Dakota", 39: "Ohio", 40: "Oklahoma", 41: "Oregon", 42: "Pennsylvania", 44: "Rhode Island", 45: "South Carolina", 46: "South Dakota", 47: "Tennessee", 48: "Texas", 49: "Utah", 50: "Vermont", 51: "Virginia", 53: "Washington", 54: "West Virginia", 55: "Wisconsin", 56: "Wyoming" };
 
+    // Function to request and process choropleth data
     const requestChoroplethData = async function (mode) {
+      
+      // Extracting features and mesh for states from US map data
       const us = await d3.json("./data/us.json");
       var states = topojson.feature(us, us.objects.states);
       var statesMesh = topojson.mesh(us, us.objects.states);
+
+       // Creating projections for both maps
       var projection_dep = d3.geoAlbersUsa().fitSize([mapWidth_dep, mapHeight_dep], states);
       var projection_change = d3.geoAlbersUsa().fitSize([mapWidth_change, mapHeight_change], states);
 
@@ -329,6 +338,7 @@
         });
       console.log(income_data_map)
 
+      // Creating color scales for each data type
       var colorQuintiles = ["#6efad7", "#00d5e8", "#00abf7", "#0079ee", "#5536bb"];
       var colorQuintilesRev = ["#5536bb", "#0079ee", "#00abf7", "#00d5e8", "#6efad7"];
       const temp_color_scale = d3.scaleQuantile().domain(temp_individual).range(colorQuintilesRev);
@@ -336,6 +346,7 @@
       const sunlight_color_scale = d3.scaleQuantile().domain(sunlight_individual).range(colorQuintilesRev);
       const income_color_scale = d3.scaleQuantile().domain(income_individual).range(colorQuintilesRev);
 
+      // Creating paths and applying fill colors using scale for each state
       let statePaths_dep = map_dep.selectAll("path.state")
         .data(states.features)
         .join("path")
@@ -364,6 +375,7 @@
           }
         })
 
+      // Adding map outlines
       map_dep.append("path")
         .datum(statesMesh)
         .attr("class", "outline")
@@ -374,19 +386,22 @@
         .attr("class", "outline")
         .attr("d", path_change);
 
-
+      // Mousover tooltip setup 
       let tooltipWidth = 100;
       let tooltipHeight = 25;
 
+      // Create hidden mesh for depression map
       const depressionMesh = map_dep.append("path")
         .attr("class", "depression-mesh")
         .style("stroke", "none")
         .style("fill", "none");
 
+      // Depression map tooltip 
       let tooltip1 = map_dep.append("g")
         .attr("class", "tooltip1")
         .attr("visibility", "hidden");
 
+      // Tooltip background
       tooltip1.append("rect")
         .attr("fill", "black")
         .attr("opacity", 0.5)
@@ -394,7 +409,8 @@
         .attr("width", tooltipWidth)
         .attr("height", tooltipHeight)
         .attr("rx", 10);
-
+      
+      // Tooltip text
       tooltip1.append("text")
         .attr("fill", "white")
         .attr("text-anchor", "middle")
@@ -402,16 +418,19 @@
         .attr("x", 0)
         .attr("y", 8)
         .attr("id", "depression-text");
-
+      
+      // Create hidden mesh for factors map 
       const changeMesh = map_change.append("path")
         .attr("class", "change-mesh")
         .style("stroke", "none")
         .style("fill", "none");
 
+      // Factors map tooltip 
       let tooltip2 = map_change.append("g")
         .attr("class", "tooltip2")
         .attr("visibility", "hidden");
-
+      
+      // Background
       tooltip2.append("rect")
         .attr("fill", "black")
         .attr("opacity", 0.5)
@@ -420,6 +439,7 @@
         .attr("height", tooltipHeight)
         .attr("rx", 10);
 
+      // Text
       tooltip2.append("text")
         .attr("fill", "white")
         .attr("text-anchor", "middle")
@@ -430,24 +450,27 @@
 
 
       map_dep.selectAll("path.state")
+        // When mouse enters state
         .on("mouseover", function (event, d) {
+          // Find depression rate of selected state 
           const depression_val = depression_data_map[d.id]
           console.log(depression_val)
+          
+          tooltip1.style("visibility", "visible")          
 
-          tooltip1.style("visibility", "visible")
-
-          const [x, y] = d3.pointer(event);
-
-          var xPos = x;
-          var yPos = y - 25;
-
+          // Display state name and depression rate in tooltip 
           tooltip1.select("#depression-text")
             .text(`${stateNum[d.id]}: ${depression_val}%`);
 
+          // Display tooltip near cursoe 
+          const [x, y] = d3.pointer(event);
+          var xPos = x;
+          var yPos = y - 25;
+
+          // Ensure tooltip is within bounds
           const textElement = tooltip1.select("#depression-text");
           const textBoundingBox = textElement.node().getBBox();
           const tooltipWidth = textBoundingBox.width + 20;
-
           if (xPos + tooltipWidth > width_dep) {
             console.log(xPos);
             xPos -= tooltipWidth;
@@ -463,18 +486,22 @@
           textElement
             .attr("x", tooltipWidth / 2)
 
+          // Change stroke of sleected state outline 
           depressionMesh.attr("d", path_dep(d))
             .style("stroke", "darkblue")
             .style("stroke-width", 3);
 
         })
+        // When mouse exits state
         .on("mouseout", function () {
+          // Hide tooltip
           tooltip1.style("visibility", "hidden");
+          // Return state outline to invisible 
           depressionMesh.style("stroke", "none").style("stroke-width", 0);
 
         });
 
-
+      // Same as above function 
       map_change.selectAll("path.state")
         .on("mouseover", function (event, d) {
           const temp_val = temp_data_map[d.id]
@@ -488,6 +515,7 @@
           var xPos = x;
           var yPos = y - 25;
 
+          // Tootip test determined by currently selected factor 
           if (mode == 1) {
             tooltip2.select("#change-text")
               .text(`${stateNum[d.id]}: ${temp_val} \u00B0F`);
@@ -546,13 +574,14 @@
     let chartArea = svg2.append("g").attr("id", "points")
       .attr("transform", `translate(${margin2.left},${margin2.top})`);
 
+    // Calculate the Pearson Correlation
     function calculatePearsonCorrelation(xValues, yValues) {
 
-
+      //Find means of both data sets
       const xMean = xValues.reduce((acc, x) => acc + x, 0) / xValues.length;
       const yMean = yValues.reduce((acc, y) => acc + y, 0) / yValues.length;
 
-
+      // Calculate the sums of the products and squared deviations
       let sumOfProducts = 0;
       let sumOfSquaredDeviationsX = 0;
       let sumOfSquaredDeviationsY = 0;
@@ -566,12 +595,12 @@
         sumOfSquaredDeviationsY += deviationY ** 2;
       }
 
-
+      // Calculate the Pearson correlation coefficient
       const r = sumOfProducts / (Math.sqrt(sumOfSquaredDeviationsX) * Math.sqrt(sumOfSquaredDeviationsY));
       return r;
     }
 
-
+    // Function to request and process data for scatter plot
     const requestChartData = async function (mode) {
 
       //Depression Data Processing
@@ -611,11 +640,13 @@
           income_individual.push(d.medianHouseholdIncome2021);
         });
       console.log(income_data_map)
-
+      
+      // Creating scale for x axis (depression rate)
       const xScale = d3.scaleLinear()
         .domain([d3.min(depression_individual) - 1, d3.max(depression_individual) + 1])
         .range([0, chartWidth]);
 
+      // Create y axis scale based on selected factor 
       var selectedMap;
       var selectedInd;
 
@@ -636,6 +667,7 @@
         .domain([d3.min(selectedInd), d3.max(selectedInd)])
         .range([chartHeight, 0]);
 
+      // Appending grid lines for both axes
       chartArea.append("g")
         .attr("class", "grid")
         .call(d3.axisLeft(yScale).tickSize(-chartWidth).tickFormat(""))
@@ -658,6 +690,7 @@
       var xValues = [];
       var yValues = [];
 
+       // Creating circles for scatter plot 
       for (const key in depression_data_map) {
         if (selectedMap[key]) {
           const depressionValue = depression_data_map[key];
@@ -684,6 +717,7 @@
 
       const correlationCoefficient = calculatePearsonCorrelation(xValues, yValues);
 
+      // Displaying Pearson Correlation 
       const legend = chartArea.append("g")
         .attr("class", "legend")
 
@@ -704,6 +738,7 @@
         .attr("alignment-baseline", "middle")
         .text("Pearson Correlation: " + d3.format(".3f")(correlationCoefficient));
 
+      // Setup tooltip
       let tooltip3Width = 100;
       let tooltip3Height = 25;
 
@@ -711,6 +746,7 @@
         .attr("class", "tooltip3")
         .attr("visibility", "hidden");
 
+      // Tooltip background
       tooltip3.append("rect")
         .attr("fill", "black")
         .attr("opacity", 0.5)
@@ -719,6 +755,7 @@
         .attr("height", tooltip3Height)
         .attr("rx", 10);
 
+      // Tooltip text
       tooltip3.append("text")
         .attr("fill", "white")
         .attr("text-anchor", "middle")
@@ -726,22 +763,29 @@
         .attr("x", 0)
         .attr("y", 8)
         .attr("id", "scatter-label");
-
+      
       chartArea.selectAll("circle")
+        // When point is selected 
         .on("mouseover", function (event, d) {
           const point = d3.select(this);
+          // Bring point to front
           point.raise();
+          // Enlarge point and change colour 
           point.attr("r", 8)
             .attr("fill", "#4d75f0");
 
+          // Display tooltip
           tooltip3.style("visibility", "visible")
 
+          // Place tooltip near center of circle 
           var xPos = parseFloat(point.attr("cx")) + 5;
           var yPos = parseFloat(point.attr("cy")) - 30;
 
+          // Set tooltip text to state name 
           tooltip3.select("#scatter-label")
             .text(`${point.attr("data-name")}`);
 
+          // Make sure tooltip is within bounds 
           const textElement = tooltip3.select("#scatter-label");
           const textBoundingBox = textElement.node().getBBox();
           const tooltip3Width = textBoundingBox.width + 20;
@@ -762,7 +806,9 @@
             .attr("x", tooltip3Width / 2)
 
         })
+        // When mouse leaves point
         .on("mouseout", function () {
+          // Hide tooltip and return point to original size and colour 
           tooltip3.style("visibility", "hidden");
           const point = d3.select(this);
           point.attr("r", 4)
@@ -771,12 +817,14 @@
 
     }
 
+    // Erase chart 
     function clearChart() {
       chartArea.selectAll("circle").remove();
       chartArea.selectAll(".grid").remove();
       chartArea.selectAll("g").remove();
     }
 
+    // If temperature button selected 
     d3.select("#temperatures").on("click", function (event) {
       clearChart();
       requestChartData(1)
@@ -790,6 +838,7 @@
 
     });
 
+    // If sunlight button selected
     d3.select("#sunlight").on("click", function (event) {
       clearChart();
       requestChartData(2)
@@ -803,6 +852,7 @@
 
     });
 
+    // If income button is selected 
     d3.select("#income").on("click", function (event) {
       clearChart();
       requestChartData(3)
@@ -816,6 +866,7 @@
 
     });
 
+    // Default to temperature vis on page load 
     d3.select("#temperatures").classed('active-sel1', true);
     clearChart();
     requestChoroplethData(1);
